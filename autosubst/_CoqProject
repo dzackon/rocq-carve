@@ -1,0 +1,38 @@
+# ========================================================
+# Makefile adapted from ocaml-autosubst
+# ========================================================
+
+# -Q . ""
+-Q "../../msl/" VST.msl
+-Q "../../src/" CARVe msl src
+
+-arg -w
+-arg -non-reversible-notation
+COQDOCFLAGS = "--charset utf-8 \
+               -s \
+               --parse-comments \
+               --with-header ./website/resources/header.html \
+               --with-footer ./website/resources/footer.html \
+               --index indexpage"
+
+core.v
+# core_axioms.v
+# unscoped.v
+# unscoped_axioms.v
+fintype.v
+# fintype_axioms.v
+ARS.v
+stlc.v
+stlc_ext.v
+step.v
+step_ext.v
+# Chapter9/step.v
+# Chapter9/reduction.v
+chapter9/preservation.v
+chapter9/presFun.v
+
+# note: step below are the same: to be improved
+
+# substruct/stlc.v
+# substruct/step.v
+# substruct/tps.v

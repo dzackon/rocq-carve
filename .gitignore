@@ -43,3 +43,9 @@ time-of-build-after.log
 time-of-build-before.log
 time-of-build-both.log
 time-of-build-pretty.log
+
+# macOS system files
+**/.DS_Store
+
+# compressed archives
+*.zip

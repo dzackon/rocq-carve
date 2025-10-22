@@ -1,0 +1,163 @@
+(** ** Typing, Context Morphism Lemmas, and Preservation *)
+(* ctx as total maps*)
+Require Import core fintype stlc step.
+Import ScopedNotations.
+
+From Coq Require Import List.
+Import List.ListNotations.
+From Coq Require Import Unicode.Utf8.
+From Coq Require Import Lia.
+From Hammer Require Import Hammer.
+Require Import Coq.Program.Equality.
+
+Require Import VST.msl.sepalg.
+Require Import VST.msl.functors.
+From CARVe.contexts Require Import total_fun.
+
+From CARVe.algebras Require Import purely_linear.
+
+
+
+Declare Custom Entry stlc.
+Notation "<{ e }>" := e (e custom stlc at level 99).
+Notation "( x )" := x (in custom stlc, x at level 99).
+Notation "x" := x (in custom stlc at level 0, x constr at level 0).
+Notation "S -o T" := (Fun  S T) (in custom stlc at level 50, right associativity).
+Notation "x ^ y" := (Core.app x y) (in custom stlc at level 1, left associativity).
+Notation "/\ T e " :=
+  (lam T e) (in custom stlc at level 90,
+        e custom stlc at level 99,
+        left associativity).
+        
+ 
+Definition tenv n := tfctx (fin n) ty mult.
+
+Inductive has_type {n} (Δ : tenv n):   tm n -> ty -> Prop :=
+
+(* | oft/var : upd Δ n _ _ A A 𝟙 𝟘 Δ' → exh Δ' → oft Δ (var n) A *)
+   | t_Var: forall (Δ': tenv n) (T : ty)  (fn : fin n),
+  
+  (*updn ty  Δ (n) T T one zero Δ'  -> *)  
+     @exh _ _ mult hal Δ' -> 
+    has_type Δ (var_tm fn) T
+ | t_Abs: forall (T1 T2: ty)  e1,
+    has_type (scons (T2,one)  Δ) e1 T1 ->
+    has_type Δ (lam T2 e1) (Fun  T2 T1)
+| t_App: forall ( Δ1 Δ2 :tenv n) (T1 T2 : ty)    (e1 e2 : tm n) ,
+    has_type Δ1 e1 (Fun T2 T1) ->
+    has_type Δ2 e2 T2 -> join Δ1 Δ2 Δ
+    -> has_type Δ (Core.app e1 e2) T1.
+
+Notation "Δ '|-' e ':' T" := (has_type Δ e T) (at level 40).     
+
+(** should be defined via `empty_tfctx` *)
+Definition emptyT {n} T: tenv n := fun x => (T, zero) .
+
+Lemma join_emptyT: forall n (Δ1 Δ2 : tenv n) T, join Δ1 Δ2 (emptyT T) -> Δ1 = (emptyT  T) /\ 
+Δ2 = (emptyT T).  
+Admitted.
+
+(** we could state it for n = 0*)
+
+Lemma canonical_forms_fun : forall (n : nat)   (M : tm n) T T1 T2,
+  has_type (emptyT T) M (Fun T1  T2) ->
+  value M ->
+  exists N U, M = (lam U N).
+Proof.
+sauto lq: on .
+Qed.    
+
+Lemma progress (n: nat) (M : tm n)  : forall T A,
+  has_type (emptyT T) M  A -> value M \/ exists M', step M M'.  
+  Proof.
+    induction M; intros .
+  - (* var *)
+    inv H. admit.  (* simpl in H. sfirstorder.*)
+  - (* app *)
+    right.
+    inversion H; clear H; subst.
+    apply join_emptyT in H5; sintuition.
+ 
+    destruct (IHM1 _ _ H2).
+      + (* t1 is a value *)
+        apply canonical_forms_fun in H2; [|assumption].
+        destruct H2 as [x [t H2]]; subst.
+        destruct (IHM2 _ _ H3).
+        * (* ... and t2 is a value *) eauto.
+        * (* ... and t2 can step *) destruct H0 as [t' H0]. eauto.
+      + (* t1 can step *)
+        destruct H as [t' H]. eauto.
+  - (*lam *) sfirstorder. 
+   
+Admitted.
+
+
+(** Context renaming *)
+Definition ltc {k k'} (Gamma: tenv k) (Delta: tenv k') rho 
+   := forall x, Delta (rho x) = Gamma x.
+   
+(** Generalized to same type different tag *)
+   
+Definition ltcg {k k'} (Gamma: tenv k) (Delta: tenv k') rho 
+   := forall x, let (t1,m1) := Delta (rho x) in 
+                let (t2 ,m2) := Gamma x in 
+                t1 = t2.   
+
+(* preservation under join: needs generalising *)
+Lemma  join_ltc1: forall n (Δ1 Δ2 Δ Delta : tenv n) rho,ltc Δ Delta rho -> join Δ1 Δ2 Δ -> ltc Δ1 Delta rho.
+Admitted.
+
+Lemma  join_ltc2: forall n (Δ1 Δ2 Δ Delta : tenv n) rho,
+ltc Δ Delta rho -> join Δ1 Δ2 Δ -> ltc Δ2 Delta rho.
+ intros.
+  apply join_comm in H0.
+  eapply join_ltc1; eassumption.
+Qed.
+ 
+(** Context renaming lemma *)
+Lemma typing_ren n k (Gamma: tenv n) (Delta: tenv k) (rho: fin n -> fin k) 
+          (M: tm n) T :
+  ltc Gamma Delta rho  -> has_type Gamma  M  T ->  has_type Delta  (ren_tm rho M)  T.
+Proof.
+  intros C H. revert k Delta rho C. induction H; intros; cbn; eauto.
+  - unfold ltc in C.  admit. (*rewrite <- C. constructor.*)
+  - constructor. apply IHhas_type. asimpl. unfold ltc. auto_case.
+  - econstructor. assert (C' := C).
+  Admitted.
+  (*
+    specialize (join_ltc1 n _ _ _ _ rho C H1).
+    apply join_ltc1 in C.
+   eauto.
+
+Lemma typing_inst n k (Gamma: tenv) (Delta: tenv) (sigma: fin n -> tm k) (M: tm n) T :
+  (forall x, Delta |- sigma x : Gamma x) -> Gamma |- M : T ->  Delta |- (M[sigma]) : T.
+*)
+Lemma preservation (n : nat) (Gamma: tenv n) (M : tm n) T :
+  has_type Gamma M  T -> forall M', step M M' -> has_type Gamma  M'  T.
+Proof.
+  induction 1; intros M' H'; cbn.
+  - inv H'.
+  - inv H'. econstructor. now apply IHhas_type.
+  - inv H'.
+    + admit. (*inv H. eapply typing_inst; try eassumption.
+      auto_case. constructor.*)
+    + eapply t_App; eauto.
+    + eapply t_App; eauto.
+    Admitted.
+
+
+
+(*
+
+Lemma typing_inst n k (Gamma: ctx n) (Delta: ctx k) (sigma: fin n -> tm k) (M: tm n) T :
+  (forall x, Delta |- sigma x : Gamma x) -> Gamma |- M : T ->  Delta |- (M[sigma]) : T.
+Proof.
+  intros C H. revert k Delta sigma C. induction H; intros; asimpl; eauto.
+  - constructor. apply IHhas_type. auto_case.
+    + eapply typing_ren; eauto. intros. unfold ltc. now asimpl.
+    + constructor.
+  - econstructor; eauto.
+Qed.
+
+Qed.
+*)
