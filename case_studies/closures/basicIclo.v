@@ -1,5 +1,5 @@
 (**
-Intrinsically typed _intutionistic_ case --- in collaboration with GTP5
+Intrinsically typed _intutionistic_ case 
 **)
 
 From Coq Require Import List.
@@ -177,25 +177,6 @@ Fixpoint Reduce (t : ty) : val t -> Prop :=
 Notation "W ∈ T" := (Reduce T W) (at level 40).   
 
   
-(* This works, but the above is simpler (internally)
-
-Program Fixpoint Reduce (t : ty) : val t -> Prop :=
-  match t with
-  | ty_Unit =>
-      fun _ => True
-  | ty_Arrow t1 t2 =>
-      fun (w : val (ty_Arrow t1 t2)) =>
-        (match w with
-        | @VClos Δ _ _ e ρ =>
-            (* logical predicate for arrows *)
-            forall (a : val t1),
-              @Reduce t1 a ->
-              exists (b : val t2),
-                @eval (t1 :: Δ) t2 (a .: ρ) e b /\ @Reduce t2 b
-           | _ => False
-           end)
-  end.
-*)
 
 Definition RedEnv (Δ : tenv) (ρ : env Δ) : Prop :=
   forall t (x : Var Δ t) v, lookup  ρ x v -> Reduce  v.   
@@ -257,13 +238,3 @@ Proof.
 Qed.
 
 (** END *)
-      
-      (* Unused computation lemmas *)
-Lemma lookup_Z {Δ t} (v : val t) (ρ : env Δ) :
-  lookup  (v .: ρ) ZVAR v.
-Proof. constructor. Qed.
-
-Lemma lookup_S {Δ t t'} (v' : val t') (ρ : env Δ) (x : Var Δ t) (v : val t) :
-  lookup ρ x v -> lookup  (v' .: ρ) (SVAR x) v.
-Proof. constructor; auto. Qed.
-    
