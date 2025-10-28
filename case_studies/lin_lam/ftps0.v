@@ -84,43 +84,6 @@ Proof.
       admit.
     + contradiction.
 Admitted.
-  (*
-  specialize (Hupd None).
-  destruct (fin_eq x None) as [Heq|Hneq].
-  - destruct Hupd as [Hhead_eq HΔ']. subst.
-    inversion Hhead_eq; subst.
-    split; [reflexivity|].
-    extensionality y. destruct y; simpl; auto.
-    auto.
-    admit.
-  - specialize (Hex None).
-    rewrite <- Hupd in Hex; simpl in Hex.
-    contradiction.
-  *)
-Admitted.
-
-(* Property upd_head_inv {n} {Δ : tenv n} {Δ' : tenv (S n)} {x s t t' m m'} :
-  upd ((s, m) .: Δ) x t t' m m' Δ' →
-  @exh _ _ mult hal Δ' →
-  ~ hal m → hal m' →
-  s = t ∧ Δ' = ((t', m') .: Δ).
-Proof.
-  - (* s = t *)
-    specialize (H x).
-    (* unfold upd in Hupd.
-    specialize (Hupd F1).
-    (* fin_eq F1 F1 = true *)
-    rewrite fin_eq_refl in Hupd.
-    destruct Hupd as [Hs _].
-    exact Hs. *)
-    admit.
-  - apply functional_extensionality. intros y.
-    specialize (H y).
-    induction (fin_eq x y) eqn:Exy; subst.
-    + admit.
-    + destruct H.
-Admitted.
- *)
 
 Property upd_exh_inv {n} {Δ : tenv n} {Δ' : tenv (S n)} {x s t t' m m'} :
   upd ((s, m) .: Δ) x t t' m m' Δ' →

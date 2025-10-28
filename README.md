@@ -1,2 +1,2 @@
-# carve-in-roqc
+# Rocq CARVe-ing
 Implementation of CARVe in Rocq
