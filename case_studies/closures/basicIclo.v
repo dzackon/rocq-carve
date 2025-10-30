@@ -1,6 +1,6 @@
-(**
-Intrinsically typed _intutionistic_ case 
-**)
+(* =============================================== *)
+(* Intrinsically typed _intutionistic_ case        *)
+(* =============================================== *)
 
 From Coq Require Import List.
 Import List.ListNotations.
@@ -15,7 +15,9 @@ Import ListNotations.
 Set Implicit Arguments.
 Generalizable All Variables.
 
-(** ---- Types, contexts, variables, intrinsically-typed terms ---- *)
+(* -------------------------------------------- *)
+(* Basic definitions                            *)
+(* -------------------------------------------- *)
 
 Inductive ty : Type :=
 | ty_Unit
@@ -38,7 +40,10 @@ Arguments SVAR {Δ t t'} _.
 
 Notation "'U'" := ty_Unit .
 
-(** ---- Mutually defined intrinsically-typed environments and values ---- *)
+(* -------------------------------------------- *)
+(* Mutually defined intrinsically-typed         *)
+(* environments and values                      *)
+(* -------------------------------------------- *)
 
 Inductive env : tenv -> Type :=
 | ENil  : env []
@@ -50,12 +55,16 @@ with val : ty -> Type :=
 Arguments ECons {Δ t} _ _.
 Arguments VClos  {Δ t1 t2} _ _.
 
-(** ---- Environment extension ---- *)
+(* -------------------------------------------- *)
+(* Environment extension                        *)
+(* -------------------------------------------- *)
 
 Definition extend {Δ t} (v : val t) (ρ : env Δ) : env (t :: Δ) := ECons v ρ.
 Notation "v .: ρ" := (extend v ρ) (at level 60, right associativity).
 
-(** ---- Relational lookup (typed de Bruijn indexing) ---- *)
+(* -------------------------------------------- *)
+(* Relational lookup (typed de Bruijn indexing) *)
+(* -------------------------------------------- *)
 
 Inductive lookup : forall Δ t, env Δ -> Var Δ t -> val t -> Prop :=
 | LZ  : forall Δ t (v : val t) (ρ : env Δ),
@@ -82,7 +91,10 @@ Proof.
   induction x; dependent destruction ρ; sintuition.
 Qed.
 
-(** ---- Big-step, call-by-value evaluation (using relational lookup) ---- *)
+(* -------------------------------------------- *)
+(* Big-step, call-by-value evaluation           *)
+(* (using relational lookup)                    *)
+(* -------------------------------------------- *)
 
 Inductive eval : forall (Δ : tenv) t, env Δ -> tm Δ t -> val t -> Prop :=
 | Ev_Var :
@@ -110,7 +122,9 @@ Inductive eval : forall (Δ : tenv) t, env Δ -> tm Δ t -> val t -> Prop :=
 
 Arguments eval {Δ t} _ _ _.
 
-(** ---- Determinism of evaluation ---- *)
+(* -------------------------------------------- *)
+(* Determinism of evaluation                    *)
+(* -------------------------------------------- *)
 
 Lemma eval_deterministic :
   forall Δ t (ρ : env Δ) (e : tm Δ t) v1 v2,
@@ -133,7 +147,9 @@ Proof.
     eapply IHHe1_3; eauto.
 Qed.
 
-(** ---- Logical relation ---- *)
+(* -------------------------------------------- *)
+(* Logical relation                             *)
+(* -------------------------------------------- *)
 
 Fixpoint Reduce (t : ty) : val t -> Prop :=
   match t with
@@ -160,7 +176,9 @@ Proof.
   intros Hρ Ha t' x v Hlk; dependent destruction Hlk; eauto.
 Qed.
 
-(** --- Fundamental Lemma (logical relation) --- *)
+(* -------------------------------------------- *)
+(* Fundamental Lemma (logical relation)         *)
+(* -------------------------------------------- *)
 
 Theorem fundamental :
   forall Δ t (e : tm Δ t) (ρ : env Δ),
@@ -197,7 +215,9 @@ Proof.
     + exact Hb.
 Qed.
 
-(** ---- Theorem ---- *)
+(* -------------------------------------------- *)
+(* Theorem                                      *)
+(* -------------------------------------------- *)
 
 (* Totality of evaluation: The evaluation of any (well-typed) term is well-defined *)
 Corollary total:

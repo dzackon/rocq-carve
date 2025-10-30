@@ -1,28 +1,25 @@
-(* (* ============================================= *) *)
-(* Weak normalization for linear λ-calculus      *)
-(* (for closed terms)            *)
-(* ============================================= *)
+(* =============================================== *)
+(* Weak normalization for linear λ-calculus        *)
+(* (for closed terms)                              *)
+(* =============================================== *)
 
 (* Library imports *)
+From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.
+From Hammer Require Import Hammer.
+
+(* Local imports *)
+From VST.msl Require Import sepalg functors.
+From CARVe Require Import contexts.total_fun algebras.purely_linear.
 From Autosubst Require Import ARS core fintype stlc step.
 Require Import tenv typing.
 Import ScopedNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
-From Hammer Require Import Hammer.
-From Coq Require Import Logic.FunctionalExtensionality.
-
-(* Separation logic / CARVe imports *)
-Require Import VST.msl.sepalg.
-Require Import VST.msl.functors.
-From CARVe.contexts Require Import total_fun.
-From CARVe.algebras Require Import purely_linear.
 
 (* General settings *)
 Set Implicit Arguments.
-(* ----------------------------------- *)
-(* Multi-step reduction and halting    *)
-(* ----------------------------------- *)
+
+(* -------------------------------------------- *)
+(* Multi-step reduction and halting             *)
+(* -------------------------------------------- *)
 
 (* Definition mstep{n} (s t : tm n) := star step s t. *)
 
@@ -30,41 +27,41 @@ Definition mstep {n} (s t : tm n) := star step s t.
 
 Inductive Halts : tm 0 → Prop :=
 | Halts_c :
-  forall (M V : tm 0),
-    mstep M V → value V → Halts M.
+    forall (M V : tm 0),
+      mstep M V → value V → Halts M.
 
 Lemma Halts_lam : forall T e,
   Halts (lam T e).
 Proof.
   intros T e.
   apply Halts_c with (V := lam T e).
-  - sfirstorder .
+  - sfirstorder.
   - simpl. exact I.
 Qed.
 
-(* ----------------------------------- *)
-(* Logical predicate                   *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Logical predicate                            *)
+(* -------------------------------------------- *)
 
 (* by structural recursion on the type *)
 Fixpoint Reduce (A : ty) (M : tm 0) : Prop :=
   match A with
   | Unit => Halts M
   | Fun A1 A2 =>
-    (* 1) the term itself halts *)
-    Halts M ∧
-    (* 2) closure under application to any reducible argument,
-          along any context split *)
-    (forall (N : tm 0),
-      Reduce A1 N →
-      Reduce A2 (Core.app M N))
+      (* 1) the term itself halts *)
+      Halts M ∧
+      (* 2) closure under application to any reducible argument,
+            along any context split *)
+      (forall (N : tm 0),
+         Reduce A1 N →
+         Reduce A2 (Core.app M N))
   end.
 
 Notation "M ∈ A" := (Reduce A M) (at level 40).
 
-(* ----------------------------------- *)
-(* Lemmas                              *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Lemmas                                       *)
+(* -------------------------------------------- *)
 
 (* Halts is backwards closed w.r.t. one step *)
 Lemma Halts_backwards_closed :
@@ -98,10 +95,10 @@ Proof.
   (* structural induction on the type A, matching the Fixpoint Reduce *)
   induction A as [| A1 IHA1 A2 IHA2]; intros M M' Hs Hred.
   - (* A = ty_Unit *)
-    cbn in *. (* Reduce ty_Unit M' = Halts M' *)
+    cbn in *.
     eapply Halts_backwards_closed; eauto.
   - (* A = ty_Arrow A1 A2 *)
-    cbn in Hred. destruct Hred as [Hhalt Hclos]. (* Halts M' ∧ closure *)
+    cbn in Hred. destruct Hred as [Hhalt Hclos].
     split.
     + (* Halts M *)
       eapply Halts_backwards_closed; eauto.
@@ -114,9 +111,9 @@ Proof.
       * exact (Hclos N HN) .
 Qed.
 
-(* ----------------------------------- *)
-(* Reducible substitutions             *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Reducible substitutions                      *)
+(* -------------------------------------------- *)
 
 Definition RedSub {n} (Δ : tenv n) : (fin n → tm 0) → Prop :=
   fun σ =>
@@ -148,12 +145,10 @@ Lemma RedSub_split1 :
     RedSub Δ1 σ.
 Proof.
   intros n Δ Δ1 Δ2 σ HRed Hjoin x.
-  (* RedSub Δ1 σ *)
   unfold RedSub in HRed.
   specialize (HRed x).
   destruct (Δ x) as [t m] eqn:E.
   destruct (Δ1 x) as [t1 m1] eqn:E1.
-  (* Need to show t1 = t *)
   assert (Heq : t1 = t).
   { pose proof (join_types_match x Hjoin) as [H1 H2].
     rewrite E, E1 in H1. cbn in H1. symmetry. exact H1. }
@@ -183,9 +178,9 @@ Proof.
   now rewrite Hlook in HRed.
 Qed.
 
-(* ----------------------------------- *)
-(* Weak normalization                  *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Fundamental lemma                            *)
+(* -------------------------------------------- *)
 
 Lemma fund :
   forall {n} {Δ : tenv n} {M : tm n} {A : ty} (σ : fin n → tm 0),
@@ -206,6 +201,10 @@ Proof.
     destruct HRed1 as [_ Hfun].
     apply Hfun. exact (IHhas_type2 σ HRed2').
 Qed.
+
+(* -------------------------------------------- *)
+(* Weak normalization                           *)
+(* -------------------------------------------- *)
 
 Lemma weak_norm :
   forall {M : tm 0} {A : ty},

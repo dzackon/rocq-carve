@@ -1,27 +1,26 @@
-(* ============================================= *)
-(* Weak normalization for linear λ-calculus      *)
-(* (with reductions under binders)               *)
-(* ============================================= *)
+(* =============================================== *)
+(* Weak normalization for linear λ-calculus        *)
+(* (with reductions under binders)                 *)
+(* =============================================== *)
 
-(* following K. Stark,
-https://www.ps.uni-saarland.de/~kstark/thesis/website/Chapter9.wn.html *)
+(**
+following K. Stark (https://www.ps.uni-saarland.de/~kstark/thesis/website/Chapter9.wn.html)
+**)
 
 (* Library imports *)
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
+From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.
 From Hammer Require Import Hammer.
-From Coq Require Import Logic.FunctionalExtensionality.
 
 (* Local imports *)
+From VST.msl Require Import sepalg functors.
+From CARVe Require Import contexts.total_fun algebras.purely_linear.
 From Autosubst Require Import ARS core fintype stlc step.
 Import ScopedNotations.
 Require Import tenv typing.
-From VST.msl Require Import sepalg functors.
-From CARVe Require Import contexts.total_fun algebras.purely_linear.
 
-(* ------------------------------------- *)
-(* Multi-step reduction and halting      *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Multi-step reduction and halting             *)
+(* -------------------------------------------- *)
 
 Definition mstep {n} (s t : tm n) := star step s t.
 
@@ -38,9 +37,9 @@ Inductive Halts {n} : tm n → Prop :=
   forall (M V : tm n),
     mstep M V → value V → Halts M.
 
-(* ------------------------------------- *)
-(* Logical predicate for open terms      *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Logical predicate for open terms             *)
+(* -------------------------------------------- *)
 
 (* E_ is the 'evaluation to a value satisfying L' predicate *)
 Definition E_ {m} (L : tm m → Prop) (s : tm m) : Prop :=
@@ -60,12 +59,9 @@ Fixpoint L {m} (A : ty) : tm m → Prop :=
       end
   end.
 
-(* Reducibility for open terms is now E_ (L A)
-Definition Reduce {m} (A : ty) (M : tm m) : Prop := E_ (L A) M. *)
-
-(* ------------------------------------- *)
-(* Key lemma: L is closed under renaming *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Key lemma: L is closed under renaming        *)
+(* -------------------------------------------- *)
 
 Lemma L_ren {m n} A (s : tm m) (xi : fin m → fin n) :
   L A s → L A (ren_tm xi s).
@@ -86,11 +82,11 @@ Proof.
     exists w. split; eauto. asimpl. eauto.
 Qed.
 
-(* ------------------------------------- *)
-(* Semantic typing judgment              *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Semantic typing judgment                     *)
+(* -------------------------------------------- *)
 
-(* G says a substitution σ is good for context Δ: as RedSub but open *)
+(* G: a substitution σ is good for context Δ (as RedSub but open) *)
 Definition G {m k} (Δ : tenv m) : (fin m → tm k) → Prop :=
   fun σ => forall (x : fin m), L (fst (Δ x)) (σ x).
 
@@ -98,9 +94,9 @@ Definition G {m k} (Δ : tenv m) : (fin m → tm k) → Prop :=
 Definition has_ty_sem {m} (Δ : tenv m) (s : tm m) (A : ty) : Prop :=
   forall k (σ : fin m → tm k), G Δ σ → E_ (L A) s[σ].
 
-(* ------------------------------------- *)
-(* Helper lemmas                         *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Helper lemmas                                *)
+(* -------------------------------------------- *)
 
 Lemma val_inclusion {m} A (e : tm m) :
   L A e → E_ (L A) e.
@@ -146,23 +142,15 @@ Lemma lookup_G :
   forall {n k} {Δ  : tenv n} {x : fin n} {t  : ty}
          (σ : fin n → tm k),
     G Δ σ →
-    (*     upd Δ x t t' m m' Δ' → *)
-    fst ( Δ x) = t  -> 
+    fst (Δ x) = t →
     L t (σ x).
 Proof.
-  intros * HG Hupd.
-  unfold G  in *. 
-  sauto. (*
-  specialize (HG x). (* specialize (Hupd x). *)
-  destruct (fin_eq x x); [| congruence].
-  destruct Hupd as [Heq _].
-  destruct (Δ x) as [tx mx].
-  inversion Heq. subst. assumption. *)
+  intros. unfold G in *. sauto.
 Qed.
 
-(* ------------------------------------- *)
-(* Main lemmas                           *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Main lemmas                                  *)
+(* -------------------------------------------- *)
 
 (* Reducible terms halt *)
 Lemma EL_halts :
@@ -188,7 +176,6 @@ Proof.
 
   - (* t_Var *)
     sauto lq:on use: val_inclusion, lookup_G. 
-(*    apply (val_inclusion _ _ (lookup_G σ HG H)).*)
 
   - (* t_Abs *)
     apply val_inclusion. asimpl.
@@ -222,9 +209,9 @@ Proof.
       * sfirstorder.
 Qed.
 
-(* ----------------------------------- *)
-(* Weak normalization                  *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Weak normalization                           *)
+(* -------------------------------------------- *)
 
 Lemma weak_norm :
   forall {M : tm 0} {A : ty},

@@ -1,22 +1,21 @@
 (* ======================================================= *)
-(* Weak normalization for DILL (with redns. under binders) *)
+(* Weak normalization for linear-intuitionistic λ-calculus *)
 (* ======================================================= *)
 
 (* Library imports *)
+From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.
+From Hammer Require Import Hammer.
+
 From Autosubst Require Import ARS core fintype fintype_axioms stlc_ext step_ext.
 Require Import algebra_ext.
 Import ScopedNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
-From Hammer Require Import Hammer.
-From Coq Require Import Logic.FunctionalExtensionality.
 
 (* General settings *)
 Set Implicit Arguments.
 
-(* ----------------------------------- *)
-(* Typing judgment                     *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Typing judgment                              *)
+(* -------------------------------------------- *)
 
 Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
 
@@ -70,9 +69,9 @@ Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
 
 Notation "Δ '⊢' M ':' A" := (has_type Δ M A) (at level 40).
 
-(* ----------------------------------- *)
-(* Multi-step reduction and halting    *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Multi-step reduction and halting             *)
+(* -------------------------------------------- *)
 
 Definition mstep {n} (s t : tm n) := star step s t.
 
@@ -85,12 +84,12 @@ Qed.
 
 Inductive Halts : tm 0 → Prop :=
 | Halts_c :
-  forall (M V : tm 0),
-    mstep M V → value V → Halts M.
+    forall (M V : tm 0),
+      mstep M V → value V → Halts M.
 
-(* ------------------------------------- *)
-(* Logical predicate for open terms      *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Logical predicate for open terms             *)
+(* -------------------------------------------- *)
 
 (* Closure under single-step reduction *)
 Inductive closure {n} (R : tm n → Prop) : tm n → Prop :=
@@ -122,9 +121,9 @@ Fixpoint L {m} (A : ty) : tm m → Prop :=
         (exists e', e = bang e' ∧ E_ (L A1) e'))
   end.
 
-(* ------------------------------------- *)
-(* Key lemma: L is closed under renaming *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Key lemma: L is closed under renaming        *)
+(* -------------------------------------------- *)
 
 Lemma closure_reaches_R :
   forall {n} (R : tm n → Prop) t,
@@ -178,9 +177,9 @@ Proof.
         cbn in Hstep'. substify. exact Hstep'.
 Qed.
 
-(* ------------------------------------- *)
-(* Semantic typing judgment              *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Semantic typing judgment                     *)
+(* -------------------------------------------- *)
 
 (* G says a substitution σ is good for context Δ: as RedSub but open *)
 Definition G {m k} (Δ : tenv m) : (fin m → tm k) → Prop :=
@@ -190,9 +189,9 @@ Definition G {m k} (Δ : tenv m) : (fin m → tm k) → Prop :=
 Definition has_ty_sem {m} (Δ : tenv m) (s : tm m) (A : ty) : Prop :=
   forall k (σ : fin m → tm k), G Δ σ → E_ (L A) s[σ].
 
-(* ------------------------------------- *)
-(* Helper lemmas                         *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Helper lemmas                                *)
+(* -------------------------------------------- *)
 
 Lemma val_inclusion {m} A (e : tm m) :
   L A e → E_ (L A) e.
@@ -262,9 +261,9 @@ Proof.
   inversion Heq. subst. assumption.
 Qed.
 
-(* ------------------------------------- *)
-(* Main lemmas                           *)
-(* ------------------------------------- *)
+(* -------------------------------------------- *)
+(* Main lemmas                                  *)
+(* -------------------------------------------- *)
 
 (* Reducible terms halt *)
 Lemma EL_halts :
@@ -398,9 +397,9 @@ Proof.
     + exact HL_w.
 Qed.
 
-(* ----------------------------------- *)
-(* Weak normalization                  *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Weak normalization                           *)
+(* -------------------------------------------- *)
 
 Lemma weak_norm :
   forall {M : tm 0} {A : ty},

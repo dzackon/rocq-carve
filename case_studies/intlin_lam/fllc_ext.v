@@ -1,24 +1,22 @@
-(* ====================================================== *)
-(* Weak normalization for DILL (no redns. under binders)  *)
-(* ====================================================== *)
+(* ======================================================= *)
+(* Weak normalization for linear-intuitionistic λ-calculus *)
+(* ======================================================= *)
 
-(* Library imports *)
+(* Imports *)
+From Coq Require Import Lia Logic.FunctionalExtensionality
+                        Program.Equality Logic.JMeq
+                        Unicode.Utf8.
+From Hammer Require Import Hammer.
 From Autosubst Require Import ARS core fintype stlc_ext step_ext.
 Require Import algebra_ext.
 Import ScopedNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
-From Hammer Require Import Hammer.
-Require Import Coq.Program.Equality.
-Require Import Coq.Logic.JMeq.
-From Coq Require Import Logic.FunctionalExtensionality.
 
 (* General settings *)
 Set Implicit Arguments.
 
-(* ----------------------------------- *)
-(* Typing judgment                     *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Typing judgment                              *)
+(* -------------------------------------------- *)
 
 Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
 
@@ -72,19 +70,19 @@ Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
 
 Notation "Δ '|-' M ':' A" := (has_type Δ M A) (at level 40).
 
-(* ----------------------------------- *)
-(* Multi-step reduction and halting    *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Multi-step reduction and halting             *)
+(* -------------------------------------------- *)
 
 Definition mstep {n} (s t : tm n) := star step s t.
 
 Inductive Halts : tm 0 → Prop :=
 | Halts_c :
-  forall (M V : tm 0),
-    mstep M V → value V → Halts M.
+    forall (M V : tm 0),
+      mstep M V → value V → Halts M.
 
-Lemma Halts_lam : forall T e,
-  Halts (lam T e).
+Lemma Halts_lam :
+  forall T e, Halts (lam T e).
 Proof.
   intros T e.
   apply Halts_c with (V := lam T e).
@@ -92,12 +90,11 @@ Proof.
   - simpl. exact I.
 Qed.
 
-(* ----------------------------------- *)
-(* Logical predicate                   *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Logical predicate                            *)
+(* -------------------------------------------- *)
 
 (* Closure under multi-step reduction *)
-(* DZ: change to single-step? Multi-step should get as corollary? *)
 Inductive closure {n} (R : tm n → Prop) : tm n → Prop :=
 | CRed {M : tm n} : R M → closure R M
 | CStep {M M' : tm n} : closure R M' → mstep M M' → closure R M.
@@ -121,9 +118,9 @@ Fixpoint Reduce (A : ty) : tm 0 → Prop :=
 
 Notation "M ∈ A" := (Reduce A M) (at level 40).
 
-(* ----------------------------------- *)
-(* Lemmas                              *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Lemmas                                       *)
+(* -------------------------------------------- *)
 
 (* Halts is backwards closed under single-step evaluation *)
 Lemma Halts_backwards_closed :
@@ -184,9 +181,9 @@ Proof.
     + exact (Halts_backwards_closed_mstep H0 IHclosure).
 Qed.
 
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
 (* Reducible substitutions             *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
 
 Definition RedSub {n} (Δ : tenv n) : (fin n → tm 0) → Prop :=
   fun σ =>
@@ -257,9 +254,9 @@ Proof.
   inversion Heq. subst. assumption.
 Qed.
 
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
 (* Weak normalization                  *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
 
 (* Fundamental lemma: If Δ ⊢ M : A and RedSub Δ σ, then M[σ] ∈ [A] *)
 Lemma fund :

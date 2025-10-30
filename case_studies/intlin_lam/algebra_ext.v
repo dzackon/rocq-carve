@@ -1,20 +1,19 @@
-(* ================================================== *)
-(* Contexts for dual linear-intuitionistic calculus  *)
-(* ================================================= *)
+(* =============================================== *)
+(* Contexts for linear-intuitionistic λ-calculus   *)
+(* =============================================== *)
 
-(* Library imports *)
+(* Imports *)
+From Coq Require Import Lia Unicode.Utf8.
+From Hammer Require Import Hammer.
 From Autosubst Require Import ARS core fintype stlc_ext.
 Import ScopedNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
-From Hammer Require Import Hammer.
 
 (* General settings *)
 Set Implicit Arguments.
 
-(* ----------------------------------- *)
-(* Decidable equality                  *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Decidable equality                           *)
+(* -------------------------------------------- *)
 
 Class EqDec (A : Type) : Type :=
   { eq_dec : forall x y : A, {x = y} + {x <> y} }.
@@ -24,9 +23,9 @@ Proof.
   induction n; [destruct x | decide equality].
 Qed.
 
-(* ----------------------------------- *)
-(* Contexts as total maps              *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Contexts as total maps                       *)
+(* -------------------------------------------- *)
 
 Section TotalFunCtx.
   Variable D : Type. (* Function domain *)
@@ -38,8 +37,6 @@ Section TotalFunCtx.
   Definition exh (hal : A → Prop) : tfctx → Prop :=
     fun C => forall r, hal (snd (C r)).
 
-  (* Definition empty_tfctx default : tfctx := fun _ => default. *)
-
   Definition lookup_tfctx : tfctx → D → R * A :=
     fun C x => C x.
 
@@ -48,9 +45,9 @@ Section TotalFunCtx.
       if eq_dec x x' then (r, a) else C x'.
 End TotalFunCtx.
 
-(* -------------------------------------- *)
-(* Linear-intuitionistic resource algebra *)
-(* -------------------------------------- *)
+(* -------------------------------------------- *)
+(* Linear-intuitionistic resource algebra       *)
+(* -------------------------------------------- *)
 
 Inductive mult : Type :=
 | Zero  : mult  (* used *)
@@ -69,9 +66,9 @@ Variant hal : mult → Prop :=
 
 Notation "a • b == c" := (mult_op a b c) (at level 50, left associativity).
 
-(* ----------------------------------- *)
-(* Typing environments                 *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Typing environments                          *)
+(* -------------------------------------------- *)
 
 Definition tenv n := tfctx (fin n) ty mult.
 
@@ -93,9 +90,9 @@ Definition upd {n} (Δ : tenv n) (x : fin n)
     else
       Δ y = Δ' y.
 
-(* ----------------------------------- *)
-(* Context properties                  *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Context properties                           *)
+(* -------------------------------------------- *)
 
 Lemma lookup_upd :
   forall {n} {Δ : tenv n} {x t m},
@@ -105,7 +102,7 @@ Proof.
   intros n Δ x t m. split.
   - intros H y.
     destruct (fin_eq x y); subst; auto.
-  - intros Hupd. sauto using (Hupd x).
+  - intros Hupd. specialize (Hupd x). sauto.
 Qed.
 
 (* If Δ₁ ⋈ Δ₂ = Δ, then Δ₂ ⋈ Δ₁ = Δ *)
@@ -143,16 +140,16 @@ Qed.
 
 Definition emptyT := femptyT Unit.
 
-(* ----------------------------------- *)
-(* Notation                            *)
-(* ----------------------------------- *)
+(* -------------------------------------------- *)
+(* Notation                                     *)
+(* -------------------------------------------- *)
 
 Declare Custom Entry stlc.
 Notation "<{ e }>" := e (e custom stlc at level 99).
-Notation "( x )" := x (in custom stlc, x at level 99).
-Notation "x" := x (in custom stlc at level 0, x constr at level 0).
-Notation "S -o T" := (Fun S T) (in custom stlc at level 50, right associativity).
-Notation "x ^ y" := (Core.app x y) (in custom stlc at level 1, left associativity).
-Notation "/\ T e" := (lam T e)
-                     (in custom stlc at level 90,
+Notation "( x )"   := x (in custom stlc, x at level 99).
+Notation "x"       := x (in custom stlc at level 0, x constr at level 0).
+Notation "S -o T"  := (Fun S T) (in custom stlc at level 50, right associativity).
+Notation "x ^ y"   := (Core.app x y) (in custom stlc at level 1, left associativity).
+Notation "/\ T e"  := (lam T e)
+                      (in custom stlc at level 90,
                       e custom stlc at level 99, left associativity).

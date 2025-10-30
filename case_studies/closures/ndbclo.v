@@ -1,6 +1,9 @@
+(* =============================================== *)
+(* Closure-based presentation of linear λ-calculus *)
+(* =============================================== *)
+
 (**
-Closure-based presentation of the linear lambda calculus:
-encoding based on standard de Bruijn notation -- not well scoped.
+An encoding based on standard de Bruijn notation (not well scoped).
 The operational semantics is big-step and does not perform substitutions,
 hence no shifting nor substitution lemma is required.
 
@@ -22,7 +25,9 @@ From CARVe.algebras Require Import purely_linear.
 
 Ltac inv H := inversion H; subst; clear H; trivial.
 
-(** ---- Definitions ---- *)
+(* -------------------------------------------- *)
+(* Definitions                                  *)
+(* -------------------------------------------- *)
 
 (* Types *)
 Inductive ty : Type :=
@@ -66,7 +71,9 @@ Inductive has_type : tenv -> tm -> ty -> Prop :=
 
 Notation "Δ '|-' t ':' T" := (has_type Δ t T) (at level 40).
 
-(** ---- Values and Environments ---- *)
+(* -------------------------------------------- *)
+(* Values and Environments                      *)
+(* -------------------------------------------- *)
 
 Inductive val : Type :=
 | unit : val
@@ -90,7 +97,9 @@ with has_ty : val -> ty -> Prop :=
 Notation "t ':' T" := (has_ty t T) (at level 40).
 Notation "η '~' Δ" := (hasty_env η Δ) (at level 40).
 
-(** ---- Preservation of context relation under merge ---- *)
+(* -------------------------------------------- *)
+(* Preservation of context relation under merge *)
+(* -------------------------------------------- *)
 
 (* If η ~ Δ and Δ₁ ⋈ Δ₂ = Δ, then η ~ Δ₁ (and Δ₂ by commutativity) *)
 Lemma merge_ctxrel_pres1: forall Δ1 Δ2 Δ η,
@@ -110,7 +119,9 @@ Proof.
   eapply merge_ctxrel_pres1; eassumption.
 Qed.
 
-(** ---- Evaluation of terms ---- *)
+(* -------------------------------------------- *)
+(* Evaluation of terms                          *)
+(* -------------------------------------------- *)
 
 Inductive lookup_venv : nat -> val -> env -> Prop :=
 | vlook_t : forall W η, lookup_venv 0 W (W :: η)
@@ -128,7 +139,9 @@ Inductive eval: env -> tm -> val -> Prop :=
 
 Notation "η '|-' e '>>' w" := (eval η e w) (at level 40).
 
-(** ---- Typing lookup lemma ---- *)
+(* -------------------------------------------- *)
+(* Typing lookup lemma                          *)
+(* -------------------------------------------- *)
 
 (* Determine a value's type by performing a look-up in the linear context:
 If η ~ Δ, A¹ ∈ₙ Δ, and W ∈ₙ η, then W : A *)
@@ -144,7 +157,9 @@ Proof.
   eapply IHHlookup with (Δ := Δ0); eauto.
 Qed.
 
-(** ---- Subject reduction ---- *)
+(* -------------------------------------------- *)
+(* Subject reduction                            *)
+(* -------------------------------------------- *)
 
 Theorem consistency : forall η M W Δ T,
     eval η M W -> hasty_env η Δ -> has_type Δ M T -> has_ty W T.
@@ -168,7 +183,9 @@ Proof.
     constructor; eauto.
 Qed.
 
-(** ---- Logical relations ---- *)
+(* -------------------------------------------- *)
+(* Logical relations                            *)
+(* -------------------------------------------- *)
  
 (* Semantic Types: because of stratification we define the logical 
     predicate as a Prop total function over types. Note: no 
@@ -187,7 +204,9 @@ Fixpoint Reduce (T : ty) (w : val) : Prop :=
 
 Notation "W ∈ T" := (Reduce T W) (at level 40).
 
-(** ---- Semantic typing ---- *)
+(* -------------------------------------------- *)
+(* Semantic typing                              *)
+(* -------------------------------------------- *)
 
 (* Semantic typing for environments *)
 Inductive REG : tenv -> env -> Prop :=
@@ -230,7 +249,9 @@ Proof.
   - intros Δ' n ?m ?m' T U. dependent destruction U; sauto lq: on.
 Qed.
 
-(** ---- Fundamental lemma ---- *)
+(* -------------------------------------------- *)
+(* Fundamental lemma                            *)
+(* -------------------------------------------- *)
 
 (* Well-typed terms are semantically typed *)
 Lemma fundamental: forall Δ t T, has_type Δ t T -> Valid Δ t T.
@@ -266,7 +287,9 @@ Proof.
     exists b; eauto using eval.
 Qed.
 
-(** ---- Theorem ---- *)
+(* -------------------------------------------- *)
+(* Totality of evaluation                       *)
+(* -------------------------------------------- *)
 
 (* Totality of evaluation: the evaluation of any (well-typed) term is well-defined *)
 Corollary total : forall t T,

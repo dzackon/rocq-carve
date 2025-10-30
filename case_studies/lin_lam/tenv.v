@@ -1,29 +1,21 @@
-(** Common type enviroments abbreviations for llc
+(**
+Common type enviroments abbreviations for LLC
+Note: needs constants for purely_linear. Should be abstracted better.
+**)
 
-. note: needs constants for purely_linear. Shoud be abstracted better
- *)
-
+From Coq Require Import Unicode.Utf8 Logic.FunctionalExtensionality.
+From VST.msl Require Import sepalg functors.
+From CARVe Require Import contexts.total_fun algebras.purely_linear.
 From Autosubst Require Import ARS core fintype stlc.
 Import ScopedNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Logic.FunctionalExtensionality.
 
-(* Separation logic / CARVe imports *)
-Require Import VST.msl.sepalg.
-Require Import VST.msl.functors.
-From CARVe.contexts Require Import total_fun.
- From CARVe.algebras Require Import purely_linear. 
-
-(* General settings *)
 Set Implicit Arguments.
 
 (* This should be in fintype, but it's not  *)
-
 Lemma fin_eq {n} (x y : fin n) : {x = y} + {x <> y}.
 Proof. induction n; [destruct x | decide equality]. Qed.
 
-(** An EqDec instance for fin n *)
-
+(* An EqDec instance for fin n *)
 #[global] Program Instance EqDec_fin (n : nat) : EqDec (fin n) :=
   {| eq_dec := @fin_eq n |}.
 
@@ -31,10 +23,24 @@ Definition tenv n := tfctx (fin n) ty mult.
 
 Definition emptyT := empty_tfctx (fin 0) _ _ (Unit, zero).
 
-(* can this go in total_fun ? How? *)
+(* Can this go in total_fun? How? *)
 Property join_emptyT: forall Δ₁ Δ₂, join Δ₁ Δ₂ emptyT → Δ₁ = emptyT ∧ Δ₂ = emptyT.
 Proof.
   split; apply functional_extensionality; intro x; contradiction.
 Qed.
 
-(* put here other properties of interest not linked to a specific type system*)
+(* If Δ₁ ⋈ Δ₂ = Δ, then types must match at each input x *)
+Lemma join_types_match :
+  forall {n} {Δ Δ1 Δ2 : tenv n} (x : fin n),
+    join Δ1 Δ2 Δ →
+    fst (Δ x) = fst (Δ1 x) ∧ fst (Δ x) = fst (Δ2 x).
+Proof.
+  intros n Δ Δ1 Δ2 x Hjoin.
+  specialize (Hjoin x).
+  destruct (Δ1 x) as [t1 m1].
+  destruct (Δ2 x) as [t2 m2].
+  destruct (Δ x) as [t m].
+  inversion Hjoin. inversion H. rewrite H1, H2. auto.
+Qed.
+
+(* Put here other properties of interest not linked to a specific type system *)
