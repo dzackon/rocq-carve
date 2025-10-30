@@ -785,8 +785,8 @@ Section SepAlgBijection.
     rewrite <- (bij_fg _ _ bij z). rewrite <- (bij_fg _ _ bij z'). f_equal; auto.
 
     do 2 red in H,H0.
-   destruct (join_assoc H H0) as [m [? ?]]; exists (bij_f _ _ bij m); split;
-   do 2 red; rewrite bij_gf; auto.
+    destruct (join_assoc H H0) as [m [? ?]]; exists (bij_f _ _ bij m); split;
+    do 2 red; rewrite bij_gf; auto.
 
     do 2 red in H|-*. apply join_comm; auto.
 
