@@ -1,14 +1,19 @@
 # Closures
 
-This dir contains various versions of weak normalization for a closure
-based presentation of the linear lambda calculus: the encoding is based on
-standard DB notation -- not well scoped. The op sem is big step and
-does not perform substitutions, hence no shifting is required nor any
-substitution lemma.
+This directory contains various versions of weak normalization for a closure-based
+presentation of the linear lambda calculus.
+The encoding is based on standard de Bruijn notation (not well scoped).
+The operational semantics is big-step and does not perform substitutions, so no shifting nor substitution lemmas are required.
+
+All files rely on Hammer, so are _not_ compatible with the current version of Rocq.
+
+## Files
 
 They all use Hammer, so _not_ compatibile with current Rocq
+- **ndbclo.v**:  
+  Numbered (but not well-scoped) DB encoding. 
+  Includes proofs of subject reduction and weak normalization.
 
-- ndbclo.v: numbered (but not well scoped) DB: subject reduction and WN
-
-- basicIclo.v:  intrinsically typed DB version, but **not** linear --- meant as a stepping stone to a linear one.
-
+- **basicIclo.v**:  
+  Intrinsically-typed DB version,  but **not** linear. 
+  Meant as a stepping stone toward a fully linear version.
