@@ -1,13 +1,11 @@
 (* =============================================== *)
-(* Typing and progres linear λ-calculus            *)
+(* Typing and progress for the linear λ-calculus   *)
 (* (contexts as total maps)                        *)
 (* =============================================== *)
 
-(* Library imports *)
+(* Imports *)
 From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.
 From Hammer Require Import Tactics.
-
-(* Local imports *)
 From VST.msl Require Import sepalg functors.
 From CARVe Require Import contexts.total_fun algebras.purely_linear.
 From Autosubst Require Import ARS core fintype stlc step.

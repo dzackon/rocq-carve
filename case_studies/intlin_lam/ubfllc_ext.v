@@ -2,10 +2,9 @@
 (* Weak normalization for linear-intuitionistic λ-calculus *)
 (* ======================================================= *)
 
-(* Library imports *)
+(* Imports *)
 From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.
 From Hammer Require Import Hammer.
-
 From Autosubst Require Import ARS core fintype fintype_axioms stlc_ext step_ext.
 Require Import algebra_ext.
 Import ScopedNotations.

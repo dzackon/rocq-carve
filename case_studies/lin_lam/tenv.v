@@ -3,6 +3,7 @@ Common type enviroments abbreviations for LLC
 Note: needs constants for purely_linear. Should be abstracted better.
 **)
 
+(* Imports *)
 From Coq Require Import Unicode.Utf8 Logic.FunctionalExtensionality.
 From VST.msl Require Import sepalg functors.
 From CARVe Require Import contexts.total_fun algebras.purely_linear.
