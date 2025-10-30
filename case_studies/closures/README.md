@@ -9,7 +9,6 @@ All files rely on Hammer, so are _not_ compatible with the current version of Ro
 
 ## Files
 
-They all use Hammer, so _not_ compatibile with current Rocq
 - **ndbclo.v**:  
   Numbered (but not well-scoped) DB encoding. 
   Includes proofs of subject reduction and weak normalization.
