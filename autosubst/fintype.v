@@ -417,3 +417,8 @@ Ltac fsimpl :=
          | [|- context[scons_p _ _ _ (shift_p _ _)]] => setoid_rewrite scons_p_tail'
          | _ => first [progress minimize | progress cbn [shift scons scons_p] ]
          end.
+
+(* Decidable equality *)
+
+Lemma fin_eq {n} (x y : fin n) : {x = y} + {x <> y}.
+Proof. induction n; [destruct x | decide equality]. Qed.

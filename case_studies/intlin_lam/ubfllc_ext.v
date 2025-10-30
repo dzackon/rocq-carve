@@ -3,70 +3,19 @@
 (* ======================================================= *)
 
 (* Imports *)
-From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.
+From Coq Require Import Lia Logic.FunctionalExtensionality
+                        Program.Equality Logic.JMeq
+                        Unicode.Utf8.
 From Hammer Require Import Hammer.
-From Autosubst Require Import ARS core fintype fintype_axioms stlc_ext step_ext.
-Require Import algebra_ext.
+From VST.msl Require Import sepalg functors.
+From CARVe Require Import contexts.total_fun algebras.dill.
+From Autosubst Require Import ARS core fintype fintype_axioms 
+                              stlc_ext step_ext.
+Require Import tenv_ext typing_ext.
 Import ScopedNotations.
 
 (* General settings *)
 Set Implicit Arguments.
-
-(* -------------------------------------------- *)
-(* Typing judgment                              *)
-(* -------------------------------------------- *)
-
-Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
-
-  | t_VarL :
-      forall (Δ' : tenv n) (T : ty) (fn : fin n),
-        upd Δ fn T T One Zero Δ' →
-        @exh _ _ mult hal Δ' →
-        has_type Δ (var_tm fn) T
-
-  | t_VarI :
-      forall (T : ty) (fn : fin n),
-        Δ fn = (T, Omega) →
-        @exh _ _ mult hal Δ →
-        has_type Δ (var_tm fn) T
-
-  | t_Unit :
-        @exh _ _ mult hal Δ →
-        has_type Δ unit Unit
-
-  | t_ElimUnit :
-      forall Δ1 Δ2 M N B,
-        has_type Δ1 M Unit →
-        has_type Δ2 N B →
-        join Δ1 Δ2 Δ →
-        has_type Δ (elimunit M N) B
-
-  | t_Abs :
-      forall (T1 T2 : ty) e1,
-        has_type (scons (T2, One) Δ) e1 T1 →
-        has_type Δ (lam T2 e1) (Fun T2 T1)
-
-  | t_App :
-      forall (Δ1 Δ2 : tenv n) (T1 T2 : ty) (e1 e2 : tm n),
-        has_type Δ1 e1 (Fun T2 T1) →
-        has_type Δ2 e2 T2 →
-        join Δ1 Δ2 Δ →
-        has_type Δ (app e1 e2) T1
-
-  | t_Bang :
-      forall M A,
-        has_type Δ M A →
-        @exh _ _ mult hal Δ →
-        has_type Δ (bang M) (Bang A)
-
-  | t_LetBang :
-      forall Δ1 Δ2 M N A B,
-        has_type Δ1 M (Bang A) →
-        has_type (scons (A, Omega) Δ2) N B →
-        join Δ1 Δ2 Δ →
-        has_type Δ (letbang M N) B.
-
-Notation "Δ '⊢' M ':' A" := (has_type Δ M A) (at level 40).
 
 (* -------------------------------------------- *)
 (* Multi-step reduction and halting             *)
@@ -245,19 +194,15 @@ Qed.
 
 (* Remark: same proof as for RedSub *)
 Lemma lookup_G :
-  forall {n k} {Δ Δ' : tenv n} {x : fin n} {t t' : ty}
-         {m m' : mult} (σ : fin n → tm k),
+  forall {n k} {Δ : tenv n} {x : fin n} {t : ty}
+         {m : mult} (σ : fin n → tm k),
     G Δ σ →
-    upd Δ x t t' m m' Δ' →
+    Δ x = (t, m) →
     L t (σ x).
 Proof.
-  intros * HG Hupd.
-  unfold G, upd in *.
-  specialize (HG x). specialize (Hupd x).
-  destruct (fin_eq x x); [| congruence].
-  destruct Hupd as [Heq _].
-  destruct (Δ x) as [tx mx].
-  inversion Heq. subst. assumption.
+  intros * Hred Heq. unfold G in *.
+  specialize (Hred x).
+  rewrite Heq in Hred. exact Hred.
 Qed.
 
 (* -------------------------------------------- *)
@@ -334,7 +279,7 @@ Proof.
     apply val_inclusion. cbn.
     intros k' xi v Hv.
     (* Need to extend G to work with v .: (σ >> ⟨xi⟩) *)
-    assert (HG' : G (scons (T2, One) Δ) (scons v (σ >> ren_tm xi))).
+    assert (HG' : G (scons (T2, one) Δ) (scons v (σ >> ren_tm xi))).
     { unfold G. intros [x'|]; cbn.
       - specialize (HG x'). now apply L_ren.
       - exact Hv. }
@@ -379,7 +324,7 @@ Proof.
     destruct (closure_reaches_R HR)
       as (_ & Hm_v' & v' & -> & e & Hm_e & HL_e).
     (* extend G2, apply IHHT2 *)
-    assert (G2' := G_extend Omega G2 HL_e).
+    assert (G2' := G_extend omega G2 HL_e).
     destruct (IHHT2 _ _ G2') as (w & Hm_w & HL_w).  
     (* conclude case *)
     eexists. split. 

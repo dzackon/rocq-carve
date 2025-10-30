@@ -7,68 +7,14 @@ From Coq Require Import Lia Logic.FunctionalExtensionality
                         Program.Equality Logic.JMeq
                         Unicode.Utf8.
 From Hammer Require Import Hammer.
+From VST.msl Require Import sepalg functors.
+From CARVe Require Import contexts.total_fun algebras.dill.
 From Autosubst Require Import ARS core fintype stlc_ext step_ext.
-Require Import algebra_ext.
+Require Import tenv_ext typing_ext.
 Import ScopedNotations.
 
 (* General settings *)
 Set Implicit Arguments.
-
-(* -------------------------------------------- *)
-(* Typing judgment                              *)
-(* -------------------------------------------- *)
-
-Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
-
-  | t_VarL :
-      forall (Δ' : tenv n) (T : ty) (fn : fin n),
-        upd Δ fn T T One Zero Δ' →
-        @exh _ _ mult hal Δ' →
-        has_type Δ (var_tm fn) T
-
-  | t_VarI :
-      forall (T : ty) (fn : fin n),
-        Δ fn = (T, Omega) →
-        @exh _ _ mult hal Δ →
-        has_type Δ (var_tm fn) T
-
-  | t_Unit :
-        @exh _ _ mult hal Δ →
-        has_type Δ unit Unit
-
-  | t_ElimUnit :
-      forall Δ1 Δ2 M N B,
-        has_type Δ1 M Unit →
-        has_type Δ2 N B →
-        join Δ1 Δ2 Δ →
-        has_type Δ (elimunit M N) B
-
-  | t_Abs :
-      forall (T1 T2 : ty) e1,
-        has_type (scons (T2, One) Δ) e1 T1 →
-        has_type Δ (lam T2 e1) (Fun T2 T1)
-
-  | t_App :
-      forall (Δ1 Δ2 : tenv n) (T1 T2 : ty) (e1 e2 : tm n),
-        has_type Δ1 e1 (Fun T2 T1) →
-        has_type Δ2 e2 T2 →
-        join Δ1 Δ2 Δ →
-        has_type Δ (Core.app e1 e2) T1
-
-  | t_Bang :
-      forall M A,
-        has_type Δ M A →
-        @exh _ _ mult hal Δ →
-        has_type Δ (bang M) (Bang A)
-
-  | t_LetBang :
-      forall Δ1 Δ2 M N A B,
-        has_type Δ1 M (Bang A) →
-        has_type (scons (A, Omega) Δ2) N B →
-        join Δ1 Δ2 Δ →
-        has_type Δ (letbang M N) B.
-
-Notation "Δ '|-' M ':' A" := (has_type Δ M A) (at level 40).
 
 (* -------------------------------------------- *)
 (* Multi-step reduction and halting             *)
@@ -182,7 +128,7 @@ Proof.
 Qed.
 
 (* -------------------------------------------- *)
-(* Reducible substitutions             *)
+(* Reducible substitutions                      *)
 (* -------------------------------------------- *)
 
 Definition RedSub {n} (Δ : tenv n) : (fin n → tm 0) → Prop :=
@@ -239,23 +185,19 @@ Qed.
 
 (* If RedSub Δ σ and x : t ∈ Δ, then σ(x) ∈ [t] *)
 Lemma lookup_redsub :
-  forall {n} {Δ Δ' : tenv n} {x : fin n} {t t' : ty}
-         {m m' : mult} (σ : fin n → tm 0),
+  forall {n} {Δ : tenv n} {x : fin n} {t : ty}
+         {m : mult} (σ : fin n → tm 0),
     RedSub Δ σ →
-    upd Δ x t t' m m' Δ' →
+    Δ x = (t, m) →
     Reduce t (σ x).
 Proof.
-  intros * HRed Hupd.
-  unfold RedSub, upd in *.
-  specialize (HRed x). specialize (Hupd x).
-  destruct (fin_eq x x); [| congruence].
-  destruct Hupd as [Heq _].
-  destruct (Δ x) as [tx mx].
-  inversion Heq. subst. assumption.
+  intros * Hred Heq. unfold RedSub in *.
+  specialize (Hred x).
+  rewrite Heq in Hred. exact Hred.
 Qed.
 
 (* -------------------------------------------- *)
-(* Weak normalization                  *)
+(* Fundamental lemma                            *)
 (* -------------------------------------------- *)
 
 (* Fundamental lemma: If Δ ⊢ M : A and RedSub Δ σ, then M[σ] ∈ [A] *)
@@ -266,8 +208,8 @@ Lemma fund :
     Reduce A M[σ].
 Proof.
   intros. induction H.
+  - exact (lookup_redsub H0 H). 
   - exact (lookup_redsub H0 H).
-  - rewrite lookup_upd in H. exact (lookup_redsub H0 H).
   - sauto.
   - destruct (RedSub_split H0 H2) as [Hσ1 Hσ2].
     specialize (IHhas_type1 σ Hσ1) as HRedM.
@@ -296,13 +238,17 @@ Proof.
     specialize (IHhas_type1 σ Hσ1) as HRed1.
     induction HRed1.
     + destruct H3 as [M' [Heq HRed1']]; subst.
-      assert (Hσ2' := RedSub_extend Omega Hσ2 HRed1').
+      assert (Hσ2' := RedSub_extend omega Hσ2 HRed1').
       eapply Reduce_backwards_closed_mstep.
       2: exact (IHhas_type2 _ Hσ2').
       apply step_mstep, step_beta_bang'. asimpl. reflexivity.
     + eapply Reduce_backwards_closed_mstep.
       apply (mstep_letbang H3 (starR step _)). exact IHHRed1.
 Qed.
+
+(* -------------------------------------------- *)
+(* Weak normalization                           *)
+(* -------------------------------------------- *)
 
 (* Theorem: If ⋅ ⊢ M : A, then M halts *)
 Theorem weak_norm :
