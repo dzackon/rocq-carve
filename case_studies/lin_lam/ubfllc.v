@@ -38,7 +38,7 @@ Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
     join Δ1 Δ2 Δ →
     has_type Δ (Core.app e1 e2) T1.
 
-Notation "Δ '|-' e ':' T" := (has_type Δ e T) (at level 40).
+Notation "Δ '⊢' e ':' T" := (has_type Δ e T) (at level 40).
 
 (* ------------------------------------- *)
 (* Multi-step reduction and halting      *)
