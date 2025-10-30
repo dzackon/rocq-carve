@@ -1,7 +1,3 @@
-(* ============================================ *)
-(* Contexts as lists                            *)
-(* ============================================ *)
-
 (**
   We reuse the VST/MSL functor and separation algebra machinery to
   encode CARVe. The aim is to show that our contexts of resources and
@@ -88,6 +84,17 @@ Proposition merge_is_JoinFunctor_lctx
 Proof.
   split; intro H; induction H; sauto.
 Qed.
+
+(* Property merge_comm'
+  {R A : Type} {JA : Join A} {PA : Perm_alg A} {SA : Sep_alg A} {Δ₁ Δ₂ Δ : lctx R A} :
+    merge Δ₁ Δ₂ Δ -> merge Δ₂ Δ₁ Δ.
+Proof.
+  intros. 
+  apply merge_is_JoinFunctor_lctx.
+  eapply (@join_comm (lctx R A)).
+  eapply (Perm_alg_lctx R A); assumption.
+  apply merge_is_JoinFunctor_lctx; assumption.
+Qed. *)
 
 (* get 'for free'? *)
 Property merge_comm

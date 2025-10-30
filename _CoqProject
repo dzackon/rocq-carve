@@ -1,0 +1,12 @@
+# ========================================================
+# Makefile for Rocq CARVe-ing
+# ========================================================
+
+-Q msl VST.msl
+-Q src CARVe
+-R case_studies/autosubst Autosubst
+-docroot CARVe # optional; only for quiet docs install
+
+msl
+src
+case_studies

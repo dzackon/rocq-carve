@@ -2,7 +2,7 @@ From Coq Require Import List.
 Import List.ListNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Lia.
-From Hammer Require Import Tactics.
+From Hammer Require Import Hammer.
 Require Import Coq.Program.Equality.
 
 Require Import VST.msl.sepalg.
@@ -15,20 +15,23 @@ Import CovariantFunctorLemmas.
 Import CovariantFunctorGenerator.
 
 Inductive mult : Type :=
-| zero : mult (* used *)
-| one : mult. (* available linearly *)
+| zero  : mult  (* used *)
+| one   : mult  (* available linearly *)
+| omega : mult. (* available unrestrictedly *)
 
 Inductive mult_op : mult -> mult -> mult -> Prop:=
 | m_00 : mult_op zero zero zero
 | m_10 : mult_op one zero one
-| m_01 : mult_op zero one one.
-
+| m_01 : mult_op zero one one
+| m_ωω : mult_op omega omega omega.
+                 
 Notation "c == a • b" := (mult_op a b c) (at level 50, left associativity).
 
 Instance Join_mult : Join mult := mult_op.
 
 Variant hal : mult → Prop :=
-| halz : hal zero.
+| halz : hal zero
+| halo : hal omega.
 
 (*
 Lemma mult_eq_dec : forall (X Y : mult), {X = Y} + {X <> Y}.
@@ -89,17 +92,65 @@ Lemma mult_op_assoc' : forall a b c d e,
 Proof.
   intros a b c d e H1 H2;
   destruct a, b, c, d, e;
-    try match goal with
-      | [ H : mult_op zero one zero |- _ ] => assert (~ mult_op zero one zero); [ unfold not; intro X; inversion X; auto | intuition]
-      | [ H : mult_op one zero zero |- _ ] => assert (~ mult_op one zero zero); [ unfold not; intro X; inversion X; auto | intuition]
-      | [ H : mult_op zero zero one |- _ ] => assert (~ mult_op zero zero one); [ unfold not; intro X; inversion X; auto | intuition]
-      | [ H : mult_op one one zero |- _ ] => assert (~ mult_op one one zero); [ unfold not; intro X; inversion X; auto | intuition]
-      | [ H : mult_op one one one |- _ ] => assert (~ mult_op one one one); [ unfold not; intro X; inversion X; auto | intuition]
-      | [ |- {f : mult & mult_op zero zero f /\ mult_op zero f zero } ] => eexists; exact (conj m_00 m_00)
-      | [ |- {f : mult & mult_op zero zero f /\ mult_op one f one } ] => eexists; exact (conj m_00 m_10)
-      | [ |- {f : mult & mult_op zero one f /\ mult_op zero f one } ] => eexists; exact (conj m_01 m_01)
-      | [ |- {f : mult & mult_op one zero f /\ mult_op zero f one } ] => eexists; exact (conj m_10 m_01)
-      end.
+
+  try match goal with
+  | [ H : mult_op zero one zero |- _ ] =>
+      assert (~ mult_op zero one zero); [ unfold not; intro X; inversion X; auto | intuition ]
+  | [ H : mult_op one zero zero |- _ ] =>
+      assert (~ mult_op one zero zero); [ unfold not; intro X; inversion X; auto | intuition ]
+  | [ H : mult_op zero zero one |- _ ] =>
+      assert (~ mult_op zero zero one); [ unfold not; intro X; inversion X; auto | intuition ]
+  | [ H : mult_op one one zero |- _ ] =>
+      assert (~ mult_op one one zero); [ unfold not; intro X; inversion X; auto | intuition ]
+  | [ H : mult_op one one one |- _ ] =>
+      assert (~ mult_op one one one); [ unfold not; intro X; inversion X; auto | intuition ]
+  | [ |- {f : mult & mult_op zero zero f /\ mult_op zero f zero} ] =>
+      eexists; exact (conj m_00 m_00)
+  | [ |- {f : mult & mult_op zero zero f /\ mult_op one f one} ] =>
+      eexists; exact (conj m_00 m_10)
+  | [ |- {f : mult & mult_op zero one f /\ mult_op zero f one} ] =>
+      eexists; exact (conj m_01 m_01)
+  | [ |- {f : mult & mult_op one zero f /\ mult_op zero f one} ] =>
+      eexists; exact (conj m_10 m_01)
+  | [ H : mult_op zero zero omega |- _ ] =>
+      assert (~ mult_op zero zero omega); [ intro X; inversion X | intuition ]
+  | [ H : mult_op zero one omega |- _ ] =>
+      assert (~ mult_op zero one omega); [ intro X; inversion X | intuition ]
+  | [ H : mult_op zero omega zero |- _ ] =>
+      assert (~ mult_op zero omega zero); [ intro X; inversion X | intuition ]
+  | [ H : mult_op zero omega one |- _ ] =>
+      assert (~ mult_op zero omega one); [ intro X; inversion X | intuition ]
+  | [ H : mult_op zero omega omega |- _ ] =>
+      assert (~ mult_op zero omega omega); [ intro X; inversion X | intuition ]
+  | [ H : mult_op one zero omega |- _ ] =>
+      assert (~ mult_op one zero omega); [ intro X; inversion X | intuition ]
+  | [ H : mult_op one one omega |- _ ] =>
+      assert (~ mult_op one one omega); [ intro X; inversion X | intuition ]
+  | [ H : mult_op one omega zero |- _ ] =>
+      assert (~ mult_op one omega zero); [ intro X; inversion X | intuition ]
+  | [ H : mult_op one omega one |- _ ] =>
+      assert (~ mult_op one omega one); [ intro X; inversion X | intuition ]
+  | [ H : mult_op one omega omega |- _ ] =>
+      assert (~ mult_op one omega omega); [ intro X; inversion X | intuition ]
+  | [ H : mult_op omega zero zero |- _ ] =>
+      assert (~ mult_op omega zero zero); [ intro X; inversion X | intuition ]
+  | [ H : mult_op omega zero one |- _ ] =>
+      assert (~ mult_op omega zero one); [ intro X; inversion X | intuition ]
+  | [ H : mult_op omega zero omega |- _ ] =>
+      assert (~ mult_op omega zero omega); [ intro X; inversion X | intuition ]
+  | [ H : mult_op omega one zero |- _ ] =>
+      assert (~ mult_op omega one zero); [ intro X; inversion X | intuition ]
+  | [ H : mult_op omega one one |- _ ] =>
+      assert (~ mult_op omega one one); [ intro X; inversion X | intuition ]
+  | [ H : mult_op omega one omega |- _ ] =>
+      assert (~ mult_op omega one omega); [ intro X; inversion X | intuition ]
+  | [ H : mult_op omega omega zero |- _ ] =>
+      assert (~ mult_op omega omega zero); [ intro X; inversion X | intuition ]
+  | [ H : mult_op omega omega one |- _ ] =>
+      assert (~ mult_op omega omega one); [ intro X; inversion X | intuition ]
+  end.
+
+  - hauto.
 Qed.
 
 (*
@@ -120,19 +171,21 @@ Instance Perm_alg_mult : Perm_alg mult :=
     mult_op_comm     (* join_comm *)
     join_positivity. (* join_positivity *)
 
-(* Proving mult is a Sep Algebra, not that
-we need it*)
+(* Proving mult is a Sep Algebra, not that we need it *)
 
-(* unit property for sep alg, see Dockins*)
+(* unit property for sep alg, seems false (DZ: it is false)
 Lemma mult_unit_sep: exists u, forall a, mult_op u a a.
 Proof.
-  exists zero. intros. destruct a; hauto l: on .
+  exists zero. intros. destruct a.
+  - best.
+  - best.
 Qed.
 
 Lemma mult_unit_sep_unique: exists ! u, forall a, mult_op u a a.
 Proof.
   sauto lq: on use: mult_canc.
 Qed.
+*)
 
 Definition mult_op_sub (a c : mult) : Prop :=
     exists b, mult_op a b c.
@@ -142,13 +195,13 @@ Definition mcore (m: mult) : mult :=
   match m with
   | zero => zero
   | one => zero
+  | omega => omega
   end.
 
 Lemma mcore_unit: forall t, unit_for (mcore t) t.
 Proof.
-  intros [|]; constructor.
-  (* sauto l: on.*)
-Qed.
+  sauto l: on.
+  Qed.
 
 Lemma join_mcore_sub: forall (a b c : mult), mult_op a b c -> mult_op_sub (mcore a) (mcore c).
 Proof.
@@ -157,7 +210,7 @@ Qed.
 
 Lemma mcore_idem : forall a, mcore (mcore a) = mcore a.
 Proof.
-  intros [|];reflexivity.
+  	sauto lq: on.
 Qed.
 
 (*
