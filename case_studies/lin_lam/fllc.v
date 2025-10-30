@@ -1,59 +1,31 @@
-(* ============================================= *)
+(* (* ============================================= *) *)
 (* Weak normalization for linear λ-calculus      *)
-(* (without reductions under binders)            *)
+(* (for closed terms)            *)
 (* ============================================= *)
 
 (* Library imports *)
-From autosubst Require Import ARS core fintype stlc step algebra.
+Require Import ARS core fintype stlc step tenv typing.
 Import ScopedNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Lia.
 From Hammer Require Import Hammer.
 From Coq Require Import Logic.FunctionalExtensionality.
 
+(* Separation logic / CARVe imports *)
+Require Import VST.msl.sepalg.
+Require Import VST.msl.functors.
+From CARVe.contexts Require Import total_fun.
+From CARVe.algebras Require Import purely_linear.
+
 (* General settings *)
 Set Implicit Arguments.
-
-(* ----------------------------------- *)
-(* Typing judgment                     *)
-(* ----------------------------------- *)
-
-Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
-
-| t_Var :
-  forall (Δ' : tenv n) (T : ty) (fn : fin n),
-    upd Δ fn T T One Zero Δ' →
-    @exh _ _ mult hal Δ' →
-    has_type Δ (var_tm fn) T
-
-| t_Abs :
-  forall (T1 T2 : ty) e1,
-    has_type (scons (T2, One) Δ) e1 T1 →
-    has_type Δ (lam T2 e1) (Fun T2 T1)
-
-| t_App :
-  forall (Δ1 Δ2 : tenv n) (T1 T2 : ty) (e1 e2 : tm n),
-    has_type Δ1 e1 (Fun T2 T1) →
-    has_type Δ2 e2 T2 →
-    join Δ1 Δ2 Δ →
-    has_type Δ (Core.app e1 e2) T1.
-
-Notation "Δ '|-' e ':' T" := (has_type Δ e T) (at level 40).
-
 (* ----------------------------------- *)
 (* Multi-step reduction and halting    *)
 (* ----------------------------------- *)
 
 (* Definition mstep{n} (s t : tm n) := star step s t. *)
 
-Inductive mstep : tm 0 → tm 0 → Prop :=
-| ms_refl :
-  forall (M : tm 0), mstep M M
-| ms_step :
-  forall (M N P : tm 0),
-    step M N →
-    mstep N P →
-    mstep M P.
+Definition mstep {n} (s t : tm n) := star step s t.
 
 Inductive Halts : tm 0 → Prop :=
 | Halts_c :
@@ -65,7 +37,7 @@ Lemma Halts_lam : forall T e,
 Proof.
   intros T e.
   apply Halts_c with (V := lam T e).
-  - apply ms_refl.
+  - sfirstorder .
   - simpl. exact I.
 Qed.
 
@@ -76,7 +48,7 @@ Qed.
 (* by structural recursion on the type *)
 Fixpoint Reduce (A : ty) (M : tm 0) : Prop :=
   match A with
-  | Base => Halts M
+  | Unit => Halts M
   | Fun A1 A2 =>
     (* 1) the term itself halts *)
     Halts M ∧
@@ -100,10 +72,10 @@ Lemma Halts_backwards_closed :
     Halts M' →
     Halts M.
 Proof.
-  intros M M' Hs Hh.
+intros M M' Hs Hh.
   destruct Hh as [V Hms Hn].
   eapply Halts_c.
-  - eapply ms_step; eauto.
+  - eapply starSE; eauto.
   - assumption.
 Qed.
 
@@ -158,7 +130,7 @@ Lemma RedSub_extend :
   forall {n} {Δ : tenv n} {σ : fin n → tm 0} {T : ty} {N : tm 0},
     RedSub Δ σ →
     Reduce T N →
-    RedSub (scons (T, One) Δ) (scons N σ).
+    RedSub (scons (T, one) Δ) (scons N σ).
 Proof.
   intros n Δ σ T N H1 H2 x.
   unfold scons.
@@ -197,19 +169,17 @@ Proof.
 Qed.
 
 Lemma lookup_redsub :
-  forall {n} {Δ Δ' : tenv n} {x : fin n} {t t' : ty}
-         {m m' : mult} (σ : fin n → tm 0),
-    RedSub Δ σ →
-    upd Δ x t t' m m' Δ' →
+  forall {n} {Δ : tenv n} {x : fin n} {t : ty} {m : mult}
+         (σ : fin n → tm 0),
+    RedSub Δ σ ->
+    @lookup_tfctx _ _ _ Δ x = (t, m) ->
     Reduce t (σ x).
 Proof.
-  intros * HRed Hupd.
-  unfold RedSub, upd in *.
-  specialize (HRed x). specialize (Hupd x).
-  destruct (fin_eq x x); [| congruence].
-  destruct Hupd as [Heq _].
-  destruct (Δ x) as [tx mx].
-  inversion Heq. subst. assumption.
+  intros * HRed Hlook.
+  unfold RedSub in HRed.
+  specialize (HRed x).
+  unfold lookup_tfctx in *.
+  now rewrite Hlook in HRed.
 Qed.
 
 (* ----------------------------------- *)
@@ -223,7 +193,7 @@ Lemma fund :
     Reduce A M[σ].
 Proof.
   intros. induction H.
-  - exact (lookup_redsub H0 H).
+  - specialize (lookup_redsub H0 H). sfirstorder.
   - split.
     + apply Halts_lam.
     + intros.

@@ -4,10 +4,10 @@ Require Import Setoid Morphisms Relation_Definitions.
 Module Core.
 
 Inductive ty : Type :=
-  | Base : ty
+  | Unit : ty
   | Fun : ty -> ty -> ty.
 
-Lemma congr_Base : Base = Base.
+Lemma congr_Unit : Unit = Unit.
 Proof.
 exact (eq_refl).
 Qed.

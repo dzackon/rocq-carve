@@ -7,39 +7,19 @@
 https://www.ps.uni-saarland.de/~kstark/thesis/website/Chapter9.wn.html *)
 
 (* Library imports *)
-Require Import ARS core fintype stlc step algebra.
+Require Import ARS core fintype stlc step tenv typing.
 Import ScopedNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Lia.
 From Hammer Require Import Hammer.
 From Coq Require Import Logic.FunctionalExtensionality.
 
-(* ------------------------------------- *)
-(* Typing judgment                       *)
-(* ------------------------------------- *)
 
-Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
-
-| t_Var :
-  forall (Δ' : tenv n) (T : ty) (fn : fin n),
-    upd Δ fn T T One Zero Δ' →
-    @exh _ _ mult hal Δ' →
-    has_type Δ (var_tm fn) T
-
-| t_Abs :
-  forall (T1 T2 : ty) e1,
-    has_type (scons (T2, One) Δ) e1 T1 →
-    has_type Δ (lam T2 e1) (Fun T2 T1)
-
-| t_App :
-  forall (Δ1 Δ2 : tenv n) (T1 T2 : ty) (e1 e2 : tm n),
-    has_type Δ1 e1 (Fun T2 T1) →
-    has_type Δ2 e2 T2 →
-    join Δ1 Δ2 Δ →
-    has_type Δ (Core.app e1 e2) T1.
-
-Notation "Δ '⊢' e ':' T" := (has_type Δ e T) (at level 40).
-
+(* Separation logic / CARVe imports *)
+Require Import VST.msl.sepalg.
+Require Import VST.msl.functors.
+From CARVe.contexts Require Import total_fun.
+From CARVe.algebras Require Import purely_linear.
 (* ------------------------------------- *)
 (* Multi-step reduction and halting      *)
 (* ------------------------------------- *)
@@ -70,7 +50,7 @@ Definition E_ {m} (L : tm m → Prop) (s : tm m) : Prop :=
 (* L is the logical predicate indexed by types, now for tm m *)
 Fixpoint L {m} (A : ty) : tm m → Prop :=
   match A with
-  | Base => fun s => exists v, mstep s v ∧ value v
+  | Unit => fun s => exists v, mstep s v ∧ value v
   | Fun A1 A2 => fun e =>
       match e with
       | lam _ s =>
@@ -92,7 +72,7 @@ Lemma L_ren {m n} A (s : tm m) (xi : fin m → fin n) :
   L A s → L A (ren_tm xi s).
 Proof.
   revert xi. induction A; intros xi.
-  - (* Base case *)
+  - (* Unit case *)
     intros (v & Hmstep & Hval).
     exists (ren_tm xi v).
     split.
@@ -164,19 +144,21 @@ Qed.
 
 (* Remark: same proof as for RedSub *)
 Lemma lookup_G :
-  forall {n k} {Δ Δ' : tenv n} {x : fin n} {t t' : ty}
-         {m m' : mult} (σ : fin n → tm k),
+  forall {n k} {Δ  : tenv n} {x : fin n} {t  : ty}
+         (σ : fin n → tm k),
     G Δ σ →
-    upd Δ x t t' m m' Δ' →
+    (*     upd Δ x t t' m m' Δ' → *)
+    fst ( Δ x) = t  -> 
     L t (σ x).
 Proof.
   intros * HG Hupd.
-  unfold G, upd in *.
-  specialize (HG x). specialize (Hupd x).
+  unfold G  in *. 
+  sauto. (*
+  specialize (HG x). (* specialize (Hupd x). *)
   destruct (fin_eq x x); [| congruence].
   destruct Hupd as [Heq _].
   destruct (Δ x) as [tx mx].
-  inversion Heq. subst. assumption.
+  inversion Heq. subst. assumption. *)
 Qed.
 
 (* ------------------------------------- *)
@@ -192,7 +174,7 @@ Proof.
   destruct A.
   - destruct HLv as [w [Hvw Hvalw]].
   hfcrush use: mstep_trans.
-  - destruct v as [ | v1 v2 | n s ]; try contradiction.
+  - destruct v; try contradiction.
     hauto l: on .
 Qed.
 
@@ -206,13 +188,14 @@ Proof.
   induction HT; intros * HG.
 
   - (* t_Var *)
-    apply (val_inclusion _ _ (lookup_G σ HG H)).
+    sauto lq:on use: val_inclusion, lookup_G. 
+(*    apply (val_inclusion _ _ (lookup_G σ HG H)).*)
 
   - (* t_Abs *)
     apply val_inclusion. asimpl.
     intros k' xi v Hv.
     (* Need to extend G to work with v .: (σ >> ⟨xi⟩) *)
-    assert (HG' : G (scons (T2, One) Δ) (scons v (σ >> ren_tm xi))).
+    assert (HG' : G (scons (T2, one) Δ) (scons v (σ >> ren_tm xi))).
     { unfold G. intros [x'|]; cbn.
       - specialize (HG x'). now apply L_ren.
       - exact Hv. }

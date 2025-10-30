@@ -19,7 +19,7 @@ Set Implicit Arguments.
 Class EqDec (A : Type) : Type :=
   { eq_dec : forall x y : A, {x = y} + {x <> y} }.
 
-Lemma fin_eq {n} (x y : fin n) : {x = y} + {x <> y}.
+Definition fin_eq {n} (x y : fin n) : {x = y} + {x <> y}.
 Proof.
   induction n; [destruct x | decide equality].
 Qed.

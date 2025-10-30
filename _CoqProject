@@ -4,8 +4,9 @@
 
 -Q msl VST.msl
 -Q src CARVe
--R case_studies/autosubst Autosubst
--docroot CARVe # optional; only for quiet docs install
+-Q case_studies/intlin_lam ""
+-Q case_studies/lin_lam ""
+-docroot CARVe 
 
 msl
 src

@@ -232,11 +232,7 @@ Lemma REG_preservation1: forall Δ1 Δ2 Δ ,
  destruct x.
   constructor.
   now eapply IHlist_join.
-  (* the following is not pretty to look at, but it works*)
   inv H0; sauto.
-  Restart. (* blind automation*)
-    intros  Δ1 Δ2 Δ H.
-  induction H; sauto.
   Qed.
   
 Lemma REG_preservation2: forall Δ1 Δ2 Δ η,
@@ -253,10 +249,7 @@ Proof.
   - (* both of these cases are impossible *)
     sauto.
   - intros Δ' n ?m ?m' T U. dependent destruction U; sauto lq: on .
-  (*
-    -- exists W. sfirstorder.
-    -- destruct (IHRR _ _ _ _ _ U) as [x _].
-       hauto. *)
+
 Qed.
 
 (** Well-typed terms are semantically typed*)
@@ -309,12 +302,4 @@ intros. apply fundamental in H. unfold Valid in H. destruct (H  nil); sfirstorde
 (* hauto use: fundamental unfold: Valid. *)
 Qed.
 
-(** comments: linearity shows up in the fundamental lemma, barely: 
 
-- var: just need to look up values in Δ ~~ η
-- app: here we need  that the extension of the predicate to contexts is 
-preserved under merge/join: join Δ1 Δ2 Δ  -> Δ ~~ η  ->  Δ1 ~~ η /\ Δ2 ~~ η to fire the IH
- 
- This lemma  follows by the definition of join, *no* algebraic property needed
-
-*)

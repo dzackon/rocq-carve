@@ -93,11 +93,6 @@ Lemma lookup_total :
 Proof.
   intros Δ t ρ x.
   induction x; dependent destruction ρ; sintuition.  
-  (*
-  - (* ZVAR *) dependent destruction ρ.
-    eexists. constructor.
-  - (* SVAR *) dependent destruction ρ.
-  sintuition. *)
     Qed.
     
     
@@ -150,16 +145,11 @@ Proof.
     specialize (IHHe1_2 _ He2_2). subst.
     (* Finally equalize the body results. *)
     eapply IHHe1_3; eauto.
-    Restart.
-      intros Δ t ρ e v1 v2 He1.
-  generalize dependent v2.
-  induction He1; intros v2 He2; dependent destruction He2;  
-  hauto lq: on dep:on use: lookup_functional .
 Qed.      
       
 (** LR **)
 
-(* For readability (optional) *)
+
 Arguments VClos  {Δ t1 t2} _ _.
 Arguments eval {Δ t} _ _ _.
 
@@ -199,7 +189,7 @@ Theorem fundamental :
     exists v, eval ρ e v /\ @Reduce t v.
 Proof.
   intros Δ t e.
-  (* Induction on the *intrinsically typed* term, no need of `dependent induction` *)
+  (* no need of `dependent induction` *)
    induction e; intros ρ Hρ.
   - (* var *)
     destruct (lookup_total ρ v) as [w Hw].
