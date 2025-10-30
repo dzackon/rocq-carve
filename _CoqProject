@@ -5,8 +5,8 @@
 -Q msl VST.msl
 -Q src CARVe
 -Q autosubst Autosubst
--Q case_studies/intlin_lam ""
--Q case_studies/lin_lam ""
+-Q case_studies/illc ""
+-Q case_studies/llc ""
 -docroot CARVe
 
 msl

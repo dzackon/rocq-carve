@@ -25,6 +25,11 @@ Definition emptyT := empty_tfctx (fin 0) _ _ (Unit, zero).
 (* Properties                                   *)
 (* -------------------------------------------- *)
 
+Property join_emptyT: forall Δ₁ Δ₂, join Δ₁ Δ₂ emptyT → Δ₁ = emptyT ∧ Δ₂ = emptyT.
+Proof.
+  split; apply functional_extensionality; intro x; contradiction.
+Qed.
+
 (* If Δ₁ ⋈ Δ₂ = Δ, then types must match at each input x *)
 Lemma join_types_match :
   forall {n} {Δ Δ1 Δ2 : tenv n} (x : fin n),
