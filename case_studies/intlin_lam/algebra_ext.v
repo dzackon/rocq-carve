@@ -3,7 +3,7 @@
 (* ================================================= *)
 
 (* Library imports *)
-Require Import ARS core fintype stlc_ext.
+From Autosubst Require Import ARS core fintype stlc_ext.
 Import ScopedNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Lia.

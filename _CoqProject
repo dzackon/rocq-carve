@@ -4,10 +4,12 @@
 
 -Q msl VST.msl
 -Q src CARVe
+-Q autosubst Autosubst
 -Q case_studies/intlin_lam ""
 -Q case_studies/lin_lam ""
--docroot CARVe 
+-docroot CARVe
 
 msl
 src
+autosubst
 case_studies

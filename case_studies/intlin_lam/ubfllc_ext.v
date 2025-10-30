@@ -3,7 +3,8 @@
 (* ======================================================= *)
 
 (* Library imports *)
-Require Import ARS core fintype fintype_axioms stlc_ext step_ext algebra_ext.
+From Autosubst Require Import ARS core fintype fintype_axioms stlc_ext step_ext.
+Require Import algebra_ext.
 Import ScopedNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Lia.

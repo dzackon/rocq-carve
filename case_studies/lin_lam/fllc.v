@@ -4,7 +4,8 @@
 (* ============================================= *)
 
 (* Library imports *)
-Require Import ARS core fintype stlc step tenv typing.
+From Autosubst Require Import ARS core fintype stlc step.
+Require Import tenv typing.
 Import ScopedNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Lia.

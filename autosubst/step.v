@@ -1,8 +1,7 @@
 (** ** Reduction and Values *)
 
-Require Export  Coq.Program.Equality.
-Require Import ARS core fintype.
-Require Import stlc.
+Require Export Coq.Program.Equality.
+From Autosubst Require Import ARS core fintype stlc.
 Set Implicit Arguments.
 Unset Strict Implicit.
 

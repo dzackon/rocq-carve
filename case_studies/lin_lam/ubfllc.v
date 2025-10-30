@@ -7,19 +7,18 @@
 https://www.ps.uni-saarland.de/~kstark/thesis/website/Chapter9.wn.html *)
 
 (* Library imports *)
-Require Import ARS core fintype stlc step tenv typing.
-Import ScopedNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Lia.
 From Hammer Require Import Hammer.
 From Coq Require Import Logic.FunctionalExtensionality.
 
+(* Local imports *)
+From Autosubst Require Import ARS core fintype stlc step.
+Import ScopedNotations.
+Require Import tenv typing.
+From VST.msl Require Import sepalg functors.
+From CARVe Require Import contexts.total_fun algebras.purely_linear.
 
-(* Separation logic / CARVe imports *)
-Require Import VST.msl.sepalg.
-Require Import VST.msl.functors.
-From CARVe.contexts Require Import total_fun.
-From CARVe.algebras Require Import purely_linear.
 (* ------------------------------------- *)
 (* Multi-step reduction and halting      *)
 (* ------------------------------------- *)

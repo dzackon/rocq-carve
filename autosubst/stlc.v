@@ -1,4 +1,4 @@
-Require Import core fintype.
+From Autosubst Require Import core fintype.
 Require Import Setoid Morphisms Relation_Definitions.
 
 Module Core.

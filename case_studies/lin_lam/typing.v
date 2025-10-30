@@ -3,8 +3,8 @@
 (* (contexts as total maps)                                *)
 (* ======================================================= *)
 
-
-Require Import ARS core fintype stlc step tenv.
+From Autosubst Require Import ARS core fintype stlc step.
+Require Import tenv.
 Import ScopedNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Lia.

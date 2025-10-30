@@ -3,7 +3,7 @@
 . note: needs constants for purely_linear. Shoud be abstracted better
  *)
 
-Require Import ARS core fintype stlc.
+From Autosubst Require Import ARS core fintype stlc.
 Import ScopedNotations.
 From Coq Require Import Unicode.Utf8.
 From Coq Require Import Logic.FunctionalExtensionality.
