@@ -1,7 +1,6 @@
-(* =============================================== *)
-(* Weak normalization for linear λ-calculus        *)
-(* (with reductions under binders)                 *)
-(* =============================================== *)
+(* ======================================================= *)
+(* Weak normalization for linear λ-calculus                *)
+(* ======================================================= *)
 
 (**
 following K. Stark (https://www.ps.uni-saarland.de/~kstark/thesis/website/Chapter9.wn.html)

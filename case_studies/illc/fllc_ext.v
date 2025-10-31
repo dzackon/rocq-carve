@@ -1,10 +1,9 @@
 (* ======================================================= *)
-(* Weak normalization for linear-intuitionistic λ-calculus *)
+(* Weak normalization for linear λ-calculus with !, Unit   *)
 (* ======================================================= *)
 
 (* Imports *)
-From Coq Require Import Lia Logic.FunctionalExtensionality
-                        Program.Equality Logic.JMeq Unicode.Utf8.
+From Coq Require Import Lia Logic.FunctionalExtensionality Program.Equality Logic.JMeq Unicode.Utf8.
 From Hammer Require Import Hammer.
 From VST.msl Require Import sepalg functors.
 From CARVe Require Import contexts.total_fun algebras.dill.

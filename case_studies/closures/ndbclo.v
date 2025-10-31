@@ -1,6 +1,6 @@
-(* =============================================== *)
-(* Closure-based presentation of linear λ-calculus *)
-(* =============================================== *)
+(* ======================================================= *)
+(* Closure-based presentation of linear λ-calculus         *)
+(* ======================================================= *)
 
 (**
 An encoding based on standard de Bruijn notation (not well scoped).

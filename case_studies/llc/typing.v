@@ -1,7 +1,7 @@
-(* =============================================== *)
-(* Typing and progress for the linear λ-calculus   *)
-(* (contexts as total maps)                        *)
-(* =============================================== *)
+(* ======================================================= *)
+(* Typing and progress for the linear λ-calculus           *)
+(* (contexts as total maps)                                *)
+(* ======================================================= *)
 
 (* Imports *)
 From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.

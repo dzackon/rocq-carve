@@ -1,6 +1,6 @@
-(* =============================================== *)
-(* Intrinsically typed _intutionistic_ case        *)
-(* =============================================== *)
+(* ======================================================= *)
+(* Intrinsically typed _intutionistic_ case                *)
+(* ======================================================= *)
 
 From Coq Require Import Lia List Unicode.Utf8.
 From Hammer Require Import Tactics.

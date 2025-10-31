@@ -1,7 +1,6 @@
-(* =============================================== *)
-(* Weak normalization for linear λ-calculus        *)
-(* (for closed terms)                              *)
-(* =============================================== *)
+(* ======================================================= *)
+(* Weak normalization for linear λ-calculus                *)
+(* ======================================================= *)
 
 (* Imports *)
 From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.

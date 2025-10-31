@@ -1,7 +1,7 @@
-(**
-Common type enviroments abbreviations for LLC
-Note: needs constants for purely_linear. Should be abstracted better.
-**)
+(* ======================================================= *)
+(* Common type enviroments abbreviations for LLC           *)
+(* Note: needs constants for purely_linear.                *)
+(* ======================================================= *)
 
 (* Imports *)
 From Coq Require Import Unicode.Utf8 Logic.FunctionalExtensionality.

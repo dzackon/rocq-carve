@@ -1,6 +1,6 @@
-(**
-Common type environments abbreviations for extended LLC
-**)
+(* ======================================================= *)
+(* Common type environments abbreviations for extended LLC *)
+(* ======================================================= *)
 
 (* Imports *)
 From Coq Require Import Unicode.Utf8 Logic.FunctionalExtensionality.
