@@ -10,18 +10,11 @@ hence no shifting nor substitution lemma is required.
 We prove subject reduction and weak normalization.
 **)
 
-From Coq Require Import List.
+From Coq Require Import Lia List Program.Equality Unicode.Utf8.
 Import List.ListNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
 From Hammer Require Import Tactics.
-Require Import Coq.Program.Equality.
-
-Require Import VST.msl.functors.
-Require Import VST.msl.sepalg.
-
-From CARVe.contexts Require Import list.
-From CARVe.algebras Require Import purely_linear.
+From VST.msl Require Import functors sepalg.
+From CARVe Require Import contexts.list algebras.purely_linear.
 
 Ltac inv H := inversion H; subst; clear H; trivial.
 
@@ -246,7 +239,7 @@ Proof.
   intros * RR.
   induction RR.
   - sauto. (* impossible cases *)
-  - intros Δ' n ?m ?m' T U. dependent destruction U; sauto lq: on.
+  - intros * U. dependent destruction U; sauto lq: on.
 Qed.
 
 (* -------------------------------------------- *)

@@ -1,5 +1,5 @@
 (**
-Common type enviroments abbreviations for extended LLC
+Common type environments abbreviations for extended LLC
 **)
 
 (* Imports *)
@@ -25,7 +25,10 @@ Definition emptyT := empty_tfctx (fin 0) _ _ (Unit, zero).
 (* Properties                                   *)
 (* -------------------------------------------- *)
 
-Property join_emptyT: forall Δ₁ Δ₂, join Δ₁ Δ₂ emptyT → Δ₁ = emptyT ∧ Δ₂ = emptyT.
+(* If Δ₁ ⋈ Δ₂ = ⋅, then Δ₁ = Δ₂ = ⋅ *)
+Property join_emptyT :
+  forall Δ₁ Δ₂,
+    join Δ₁ Δ₂ emptyT → Δ₁ = emptyT ∧ Δ₂ = emptyT.
 Proof.
   split; apply functional_extensionality; intro x; contradiction.
 Qed.
