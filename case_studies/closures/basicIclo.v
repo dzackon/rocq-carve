@@ -2,14 +2,9 @@
 (* Intrinsically typed _intutionistic_ case        *)
 (* =============================================== *)
 
-From Coq Require Import List.
-Import List.ListNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
+From Coq Require Import Lia List Unicode.Utf8.
 From Hammer Require Import Tactics.
 Require Import Coq.Program.Equality.
-
-From Coq Require Import List.
 Import ListNotations.
 
 Set Implicit Arguments.
@@ -21,19 +16,19 @@ Generalizable All Variables.
 
 Inductive ty : Type :=
 | ty_Unit
-| ty_Arrow : ty -> ty -> ty.
+| ty_Arrow : ty → ty → ty.
 
 Definition tenv := list ty.
 
-Inductive Var : tenv -> ty -> Type :=
+Inductive Var : tenv → ty → Type :=
 | ZVAR : forall Δ t, Var (t :: Δ) t
-| SVAR : forall Δ t t', Var Δ t -> Var (t' :: Δ) t.
+| SVAR : forall Δ t t', Var Δ t → Var (t' :: Δ) t.
 
-Inductive tm (Δ : tenv) : ty -> Type :=
-| var  : forall t, Var Δ t -> tm Δ t
+Inductive tm (Δ : tenv) : ty → Type :=
+| var  : forall t, Var Δ t → tm Δ t
 | ut   : tm Δ ty_Unit
-| abs  : forall t1 t2, tm (t1 :: Δ) t2 -> tm Δ (ty_Arrow t1 t2)
-| app  : forall t1 t2, tm Δ (ty_Arrow t1 t2) -> tm Δ t1 -> tm Δ t2.
+| abs  : forall t1 t2, tm (t1 :: Δ) t2 → tm Δ (ty_Arrow t1 t2)
+| app  : forall t1 t2, tm Δ (ty_Arrow t1 t2) → tm Δ t1 → tm Δ t2.
 
 Arguments ZVAR {Δ t}.
 Arguments SVAR {Δ t t'} _.
@@ -45,12 +40,12 @@ Notation "'U'" := ty_Unit .
 (* environments and values                      *)
 (* -------------------------------------------- *)
 
-Inductive env : tenv -> Type :=
+Inductive env : tenv → Type :=
 | ENil  : env []
-| ECons : forall Δ t, val t -> env Δ -> env (t :: Δ)
-with val : ty -> Type :=
+| ECons : forall Δ t, val t → env Δ → env (t :: Δ)
+with val : ty → Type :=
 | VUnit : val ty_Unit
-| VClos : forall Δ t1 t2, tm (t1 :: Δ) t2 -> env Δ -> val (ty_Arrow t1 t2).
+| VClos : forall Δ t1 t2, tm (t1 :: Δ) t2 → env Δ → val (ty_Arrow t1 t2).
 
 Arguments ECons {Δ t} _ _.
 Arguments VClos  {Δ t1 t2} _ _.
@@ -66,17 +61,17 @@ Notation "v .: ρ" := (extend v ρ) (at level 60, right associativity).
 (* Relational lookup (typed de Bruijn indexing) *)
 (* -------------------------------------------- *)
 
-Inductive lookup : forall Δ t, env Δ -> Var Δ t -> val t -> Prop :=
+Inductive lookup : forall Δ t, env Δ → Var Δ t → val t → Prop :=
 | LZ  : forall Δ t (v : val t) (ρ : env Δ),
     lookup (ECons v ρ) ZVAR v
 | LS  : forall Δ t t' (v' : val t') (ρ : env Δ) (x : Var Δ t) (v : val t),
-    lookup ρ x v ->
+    lookup ρ x v →
     lookup (ECons v' ρ) (SVAR x) v.
 
 (* Functionality of lookup *)
 Lemma lookup_functional :
   forall Δ t (ρ : env Δ) (x : Var Δ t) v1 v2,
-    lookup ρ x v1 -> lookup ρ x v2 -> v1 = v2.
+    lookup ρ x v1 → lookup ρ x v2 → v1 = v2.
 Proof.
   intros Δ t ρ x v1 v2 H1; revert v2.
   induction H1; intros v2 H2; dependent destruction H2; subst; eauto.
@@ -96,10 +91,10 @@ Qed.
 (* (using relational lookup)                    *)
 (* -------------------------------------------- *)
 
-Inductive eval : forall (Δ : tenv) t, env Δ -> tm Δ t -> val t -> Prop :=
+Inductive eval : forall (Δ : tenv) t, env Δ → tm Δ t → val t → Prop :=
 | Ev_Var :
     forall Δ t (ρ : env Δ) (x : Var Δ t) v,
-      lookup ρ x v ->
+      lookup ρ x v →
       eval ρ (var x) v
 | Ev_Ut :
     forall Δ (ρ : env Δ),
@@ -113,11 +108,11 @@ Inductive eval : forall (Δ : tenv) t, env Δ -> tm Δ t -> val t -> Prop :=
            (Δ0 : tenv) (e : tm (t1 :: Δ0) t2) (ρ0 : env Δ0)
            (varg : val t1) (vres : val t2),
       (* operator to closure *)
-      eval ρ e1 (VClos e ρ0) ->
+      eval ρ e1 (VClos e ρ0) →
       (* argument to value *)
-      eval ρ e2 varg ->
+      eval ρ e2 varg →
       (* body under captured env extended with argument *)
-      eval (varg .: ρ0) e vres ->
+      eval (varg .: ρ0) e vres →
       eval ρ (app e1 e2) vres.
 
 Arguments eval {Δ t} _ _ _.
@@ -128,8 +123,8 @@ Arguments eval {Δ t} _ _ _.
 
 Lemma eval_deterministic :
   forall Δ t (ρ : env Δ) (e : tm Δ t) v1 v2,
-    eval ρ e v1 ->
-    eval ρ e v2 ->
+    eval ρ e v1 →
+    eval ρ e v2 →
     v1 = v2.
 Proof.
   intros Δ t ρ e v1 v2 He1.
@@ -151,27 +146,27 @@ Qed.
 (* Logical relation                             *)
 (* -------------------------------------------- *)
 
-Fixpoint Reduce (t : ty) : val t -> Prop :=
+Fixpoint Reduce (t : ty) : val t → Prop :=
   match t with
   | ty_Unit => fun _ => True
   | ty_Arrow t1 t2 =>
       fun w =>
         exists Δ (e : tm (t1 :: Δ) t2) (ρ : env Δ),
           w = VClos e ρ /\
-          (forall (a : val t1), @Reduce t1 a ->
+          (forall (a : val t1), @Reduce t1 a →
              exists (b : val t2), eval (a .: ρ) e b /\ @Reduce t2 b)
   end.
 
 Notation "W ∈ T" := (Reduce T W) (at level 40).
 
 Definition RedEnv (Δ : tenv) (ρ : env Δ) : Prop :=
-  forall t (x : Var Δ t) v, lookup ρ x v -> Reduce v.
+  forall t (x : Var Δ t) v, lookup ρ x v → Reduce v.
 
 Lemma RedEnvNil : RedEnv ENil.
 Proof. hfcrush. Qed.
 
 Lemma RedEnv_extend {Δ t} (ρ : env Δ) (w : val t) :
-  RedEnv ρ -> @Reduce t w -> RedEnv (w .: ρ).
+  RedEnv ρ → @Reduce t w → RedEnv (w .: ρ).
 Proof.
   intros Hρ Ha t' x v Hlk; dependent destruction Hlk; eauto.
 Qed.
@@ -182,7 +177,7 @@ Qed.
 
 Theorem fundamental :
   forall Δ t (e : tm Δ t) (ρ : env Δ),
-    RedEnv ρ ->
+    RedEnv ρ →
     exists v, eval ρ e v /\ @Reduce t v.
 Proof.
   intros Δ t e.

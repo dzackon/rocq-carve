@@ -1,15 +1,7 @@
-From Coq Require Import List.
-Import List.ListNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
+From Coq Require Import List Lia Program.Equality Unicode.Utf8.
 From Hammer Require Import Tactics.
-Require Import Coq.Program.Equality.
-
-Require Import VST.msl.sepalg.
-Require Import VST.msl.functors.
-Require Import VST.msl.sepalg_functors.
-Require Import VST.msl.sepalg_generators.
-
+From VST.msl Require Import sepalg functors sepalg_functors sepalg_generators.
+Import List.ListNotations.
 Import CovariantFunctor.
 Import CovariantFunctorLemmas.
 Import CovariantFunctorGenerator.
@@ -30,12 +22,10 @@ Instance Join_mult : Join mult := mult_op.
 Variant hal : mult → Prop :=
 | halz : hal zero.
 
-(*
-Lemma mult_eq_dec : forall (X Y : mult), {X = Y} + {X <> Y}.
+(* Lemma mult_eq_dec : forall (X Y : mult), {X = Y} + {X <> Y}.
 Proof.
   decide equality.
-Qed.
-*)
+Qed. *)
 
 (* Monoidal properties *)
 Lemma mult_unit : forall a, exists u, mult_op u a a.
@@ -49,12 +39,13 @@ Proof.
 Qed.
 
 (* Property mult_hal_unit2 : forall a, hal a -> forall b, mult_op a b b.
-Proof. sauto. Qed. *)
+Proof.
+  sauto.
+Qed. *)
 
 Lemma mult_op_comm: forall (a b c : mult), mult_op a b c -> mult_op b a c.
 Proof.
   sauto lq: on.
-  (* intros. destruct a; destruct b; reflexivity. *)
 Qed.
 
 Lemma mult_func : forall α₁ α₂ α α', mult_op α₁ α₂ α → mult_op α₁ α₂ α' → α = α'.
@@ -120,10 +111,9 @@ Instance Perm_alg_mult : Perm_alg mult :=
     mult_op_comm     (* join_comm *)
     join_positivity. (* join_positivity *)
 
-(* Proving mult is a Sep Algebra, not that
-we need it*)
+(* Proving mult is a separation algebra *)
 
-(* unit property for sep alg, see Dockins*)
+(* unit property for separation algebra (see Dockins) *)
 Lemma mult_unit_sep: exists u, forall a, mult_op u a a.
 Proof.
   exists zero. intros. destruct a; hauto l: on .
@@ -147,7 +137,6 @@ Definition mcore (m: mult) : mult :=
 Lemma mcore_unit: forall t, unit_for (mcore t) t.
 Proof.
   intros [|]; constructor.
-  (* sauto l: on.*)
 Qed.
 
 Lemma join_mcore_sub: forall (a b c : mult), mult_op a b c -> mult_op_sub (mcore a) (mcore c).

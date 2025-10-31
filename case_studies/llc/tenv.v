@@ -10,6 +10,7 @@ From CARVe Require Import contexts.total_fun algebras.purely_linear.
 From Autosubst Require Import ARS core fintype stlc.
 Import ScopedNotations.
 
+(* General settings *)
 Set Implicit Arguments.
 
 (* -------------------------------------------- *)

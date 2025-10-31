@@ -1,14 +1,10 @@
-Require Import VST.msl.sepalg.
-Require Import VST.msl.functors.
-Require Import VST.msl.sepalg_functors.
-Require Import VST.msl.sepalg_generators.
-
+From Coq Require Import Logic.FunctionalExtensionality.
+From Hammer Require Import Hammer.
+From VST.msl Require Import sepalg functors sepalg_functors sepalg_generators.
 Import CovariantFunctor.
 Import CovariantFunctorLemmas.
 Import CovariantFunctorGenerator.
 
-From Hammer Require Import Hammer.
-From Coq Require Import Logic.FunctionalExtensionality.
 (* Decidable equality *)
 Class EqDec (A : Type) : Type :=
   {

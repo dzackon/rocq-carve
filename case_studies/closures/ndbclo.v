@@ -25,13 +25,13 @@ Ltac inv H := inversion H; subst; clear H; trivial.
 (* Types *)
 Inductive ty : Type :=
 | Ty_Unit  : ty
-| Ty_Arrow : ty -> ty -> ty.
+| Ty_Arrow : ty → ty → ty.
 
 (* Terms *)
 Inductive tm : Type :=
-| var   : nat -> tm
-| app   : tm -> tm -> tm
-| abs   : tm -> tm
+| var   : nat → tm
+| app   : tm → tm → tm
+| abs   : tm → tm
 | ut    : tm.
 
 (* Notation *)
@@ -49,20 +49,20 @@ Notation "'unit'"  := ut (in custom stlc at level 0).
 (* List-based contexts *)
 Definition tenv := lctx ty mult.
 
-Inductive has_type : tenv -> tm -> ty -> Prop :=
-| t_Unit: forall Δ, exh hal Δ -> has_type Δ <{unit}> Ty_Unit
+Inductive has_type : tenv → tm → ty → Prop :=
+| t_Unit: forall Δ, exh hal Δ → has_type Δ <{unit}> Ty_Unit
 | t_Var: forall Δ Δ' T n,
-    updn Δ n T T one zero Δ' -> exh hal Δ' -> has_type Δ (var n) T
+    updn Δ n T T one zero Δ' → exh hal Δ' → has_type Δ (var n) T
 | t_Abs: forall Δ T1 T2 t1,
-    has_type ((T2, one)::Δ) t1 T1 ->
+    has_type ((T2, one)::Δ) t1 T1 →
     has_type Δ <{/\ t1}> (Ty_Arrow T2 T1)
 | t_App: forall Δ Δ1 Δ2 T1 T2 t1 t2,
-    has_type Δ1 t1 (Ty_Arrow T2 T1) ->
-    has_type Δ2 t2 T2 ->
-    join Δ1 Δ2 Δ ->
+    has_type Δ1 t1 (Ty_Arrow T2 T1) →
+    has_type Δ2 t2 T2 →
+    join Δ1 Δ2 Δ →
     has_type Δ <{t1 t2}> T1.
 
-Notation "Δ '|-' t ':' T" := (has_type Δ t T) (at level 40).
+Notation "Δ '⊢' t ':' T" := (has_type Δ t T) (at level 40).
 
 (* -------------------------------------------- *)
 (* Values and Environments                      *)
@@ -70,21 +70,21 @@ Notation "Δ '|-' t ':' T" := (has_type Δ t T) (at level 40).
 
 Inductive val : Type :=
 | unit : val
-| closure : list val -> tm -> val.
+| closure : list val → tm → val.
 
 Definition env := list val.
 
-Inductive hasty_env : env -> tenv -> Prop :=
+Inductive hasty_env : env → tenv → Prop :=
 | type_empty: hasty_env nil nil
 | type_cons: forall e Δ v T m,
-    hasty_env e Δ ->
-    has_ty v T ->
+    hasty_env e Δ →
+    has_ty v T →
     hasty_env (v :: e) ((T, m) :: Δ)
-with has_ty : val -> ty -> Prop :=
+with has_ty : val → ty → Prop :=
 | type_unit: has_ty unit Ty_Unit
 | type_closure: forall e Δ T t1,
-    has_type Δ <{/\ t1}> T ->
-    hasty_env e Δ ->
+    has_type Δ <{/\ t1}> T →
+    hasty_env e Δ →
     has_ty (closure e <{/\ t1}>) T.
 
 Notation "t ':' T" := (has_ty t T) (at level 40).
@@ -96,7 +96,7 @@ Notation "η '~' Δ" := (hasty_env η Δ) (at level 40).
 
 (* If η ~ Δ and Δ₁ ⋈ Δ₂ = Δ, then η ~ Δ₁ (and Δ₂ by commutativity) *)
 Lemma merge_ctxrel_pres1: forall Δ1 Δ2 Δ η,
-    join Δ1 Δ2 Δ -> hasty_env η Δ -> hasty_env η Δ1.
+    join Δ1 Δ2 Δ → hasty_env η Δ → hasty_env η Δ1.
 Proof.
   intros.
   generalize dependent Δ1.
@@ -105,7 +105,7 @@ Proof.
 Qed.
 
 Lemma merge_ctxrel_pres2: forall Δ1 Δ2 Δ η,
-    join Δ1 Δ2 Δ -> hasty_env η Δ -> hasty_env η Δ2.
+    join Δ1 Δ2 Δ → hasty_env η Δ → hasty_env η Δ2.
 Proof.
   intros.
   apply join_comm in H.
@@ -116,21 +116,21 @@ Qed.
 (* Evaluation of terms                          *)
 (* -------------------------------------------- *)
 
-Inductive lookup_venv : nat -> val -> env -> Prop :=
+Inductive lookup_venv : nat → val → env → Prop :=
 | vlook_t : forall W η, lookup_venv 0 W (W :: η)
-| vlook_n : forall n W η W', lookup_venv n W η -> lookup_venv (S n) W (W' :: η).
+| vlook_n : forall n W η W', lookup_venv n W η → lookup_venv (S n) W (W' :: η).
 
-Inductive eval: env -> tm -> val -> Prop :=
+Inductive eval: env → tm → val → Prop :=
 | eval_unit: forall e, eval e <{unit}> unit
 | eval_var: forall n W η, lookup_venv n W η → eval η (var n) W
 | eval_abs: forall e t1, eval e <{/\ t1}> (closure e <{/\ t1}>)
 | eval_app: forall e e' t1 t2 t3 v v',
-    eval e t2 (closure e' <{/\ t1}>) ->
-    eval e t3 v' ->
-    eval (v' :: e') t1 v ->
+    eval e t2 (closure e' <{/\ t1}>) →
+    eval e t3 v' →
+    eval (v' :: e') t1 v →
     eval e <{t2 t3}> v.
 
-Notation "η '|-' e '>>' w" := (eval η e w) (at level 40).
+Notation "η '⊢' e '>>' w" := (eval η e w) (at level 40).
 
 (* -------------------------------------------- *)
 (* Typing lookup lemma                          *)
@@ -139,9 +139,9 @@ Notation "η '|-' e '>>' w" := (eval η e w) (at level 40).
 (* Determine a value's type by performing a look-up in the linear context:
 If η ~ Δ, A¹ ∈ₙ Δ, and W ∈ₙ η, then W : A *)
 Lemma lookup_hasty: forall η n W,
-    lookup_venv n W η -> forall Δ Δ' m m' A,
-    hasty_env η Δ ->
-    updn Δ n A A m m' Δ' ->
+    lookup_venv n W η → forall Δ Δ' m m' A,
+    hasty_env η Δ →
+    updn Δ n A A m m' Δ' →
     has_ty W A.
 Proof.
   intros * Hlookup.
@@ -155,7 +155,7 @@ Qed.
 (* -------------------------------------------- *)
 
 Theorem consistency : forall η M W Δ T,
-    eval η M W -> hasty_env η Δ -> has_type Δ M T -> has_ty W T.
+    eval η M W → hasty_env η Δ → has_type Δ M T → has_ty W T.
 Proof.
   intros.
   generalize dependent Δ.
@@ -190,7 +190,7 @@ Fixpoint Reduce (T : ty) (w : val) : Prop :=
   | Ty_Arrow T1 T2 =>
     match w with
     | closure η <{/\ t1}> =>
-        forall a, Reduce T1 a -> exists b, eval (a :: η) t1 b /\ Reduce T2 b
+        forall a, Reduce T1 a → exists b, eval (a :: η) t1 b /\ Reduce T2 b
     | _ => False
     end
   end.
@@ -202,23 +202,23 @@ Notation "W ∈ T" := (Reduce T W) (at level 40).
 (* -------------------------------------------- *)
 
 (* Semantic typing for environments *)
-Inductive REG : tenv -> env -> Prop :=
+Inductive REG : tenv → env → Prop :=
 | REGn: REG nil nil
-| REGc1 Δ η W A m : REG Δ η -> Reduce A W ->
+| REGc1 Δ η W A m : REG Δ η → Reduce A W →
     REG ((A, m) :: Δ) (W :: η).
 
 Notation "Δ '~~' η" := (REG Δ η) (at level 40).
 
 (*Semantic typing for terms *)
 Definition Valid (Δ : tenv) (t : tm) (T : ty) : Prop :=
-  forall η, REG Δ η -> exists a, eval η t a /\ Reduce T a.
+  forall η, REG Δ η → exists a, eval η t a /\ Reduce T a.
 
 Notation "Gamma '|=' t ':' T" := (Valid Gamma t T) (at level 40).
 
 Hint Unfold Valid : core.
 
 Lemma REG_preservation1: forall Δ1 Δ2 Δ,
-    join Δ1 Δ2 Δ -> forall η, Δ ~~ η -> Δ1 ~~ η.
+    join Δ1 Δ2 Δ → forall η, Δ ~~ η → Δ1 ~~ η.
 Proof.
   intros Δ1 Δ2 Δ H.
   induction H; intros.
@@ -227,13 +227,13 @@ Proof.
 Qed.
  
 Lemma REG_preservation2: forall Δ1 Δ2 Δ η,
-    join Δ1 Δ2 Δ -> Δ ~~ η -> Δ2 ~~ η.
+    join Δ1 Δ2 Δ → Δ ~~ η → Δ2 ~~ η.
 Proof.
   intros. apply join_comm in H. eapply REG_preservation1; eassumption.
 Qed.
 
 Lemma REG_lookup: forall Δ η,
-    Δ ~~ η -> forall Δ' n m m' T, updn Δ n T T m m' Δ' ->
+    Δ ~~ η → forall Δ' n m m' T, updn Δ n T T m m' Δ' →
     exists W, lookup_venv n W η /\ W ∈ T.
 Proof.
   intros * RR.
@@ -247,7 +247,7 @@ Qed.
 (* -------------------------------------------- *)
 
 (* Well-typed terms are semantically typed *)
-Lemma fundamental: forall Δ t T, has_type Δ t T -> Valid Δ t T.
+Lemma fundamental: forall Δ t T, has_type Δ t T → Valid Δ t T.
 Proof.
   unfold Valid.
   intros Δ t A H. induction H; intros η Rel.
@@ -267,7 +267,7 @@ Proof.
       firstorder.
   - (* app *)
     assert (Rel' := Rel). assert (H1' := H1).
-    assert (join Δ1 Δ2 Δ -> Δ ~~ η -> Δ1 ~~ η) by sfirstorder use: REG_preservation1.
+    assert (join Δ1 Δ2 Δ → Δ ~~ η → Δ1 ~~ η) by sfirstorder use: REG_preservation1.
     apply H2 in H1'. clear H2.
     apply (REG_preservation2 Δ1 Δ2 Δ η) in H1.
     apply IHhas_type1 in H1'.
@@ -286,7 +286,7 @@ Qed.
 
 (* Totality of evaluation: the evaluation of any (well-typed) term is well-defined *)
 Corollary total : forall t T,
-  has_type [] t T -> exists a, eval [] t a.
+  has_type [] t T → exists a, eval [] t a.
 Proof.
   intros. apply fundamental in H. unfold Valid in H. destruct (H nil); sfirstorder.
 Qed.

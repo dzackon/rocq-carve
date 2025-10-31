@@ -1,15 +1,9 @@
-Require Import VST.msl.sepalg.
-Require Import VST.msl.functors.
-Require Import VST.msl.sepalg_functors.
-Require Import VST.msl.sepalg_generators.
-
+From Hammer Require Import Tactics.
+From VST.msl Require Import sepalg functors sepalg_functors sepalg_generators.
 From CARVe Require Import optalg.
-
 Import CovariantFunctor.
 Import CovariantFunctorLemmas.
 Import CovariantFunctorGenerator.
-
-From Hammer Require Import Tactics.
 
 (* Decidable equality *)
 Class EqDec (A : Type) : Type :=
@@ -40,7 +34,6 @@ Section FunCtx.
                           | None, None, None => True
                           | _, _, _ => False
                           end).
-
   Proof.
     reflexivity.
   Qed.

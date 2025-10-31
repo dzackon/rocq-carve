@@ -588,4 +588,3 @@ Defined.
 End MixVariantFunctorGenerator.
 
 Unset Implicit Arguments.
-

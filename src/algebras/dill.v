@@ -1,233 +1,47 @@
-From Coq Require Import List.
-Import List.ListNotations.
-From Coq Require Import Unicode.Utf8.
-From Coq Require Import Lia.
 From Hammer Require Import Hammer.
-Require Import Coq.Program.Equality.
+From VST.msl Require Import sepalg sepalg_generators.
+From CARVe.algebras Require Import purely_linear structural.
 
-Require Import VST.msl.sepalg.
-Require Import VST.msl.functors.
-Require Import VST.msl.sepalg_functors.
-Require Import VST.msl.sepalg_generators.
+Definition mult : Type := purely_linear.mult + structural.mult.
 
-Import CovariantFunctor.
-Import CovariantFunctorLemmas.
-Import CovariantFunctorGenerator.
+(* Handy definitions *)
+Definition zero  : mult := inl purely_linear.zero.
+Definition one   : mult := inl purely_linear.one.
+Definition omega : mult := inr tt.
 
-Inductive mult : Type :=
-| zero  : mult  (* used *)
-| one   : mult  (* available linearly *)
-| omega : mult. (* available unrestrictedly *)
+Instance Join_mult : Join mult :=
+  Join_sum _ purely_linear.Join_mult _ structural.Join_mult.
+
+(* The following definition and lemma are an inductive
+characterization of the join that MSL generates. They exists solely to
+reassure the reader that the framework does the right thing, and they
+are not meant to be used in proof developments. *)
 
 Inductive mult_op : mult -> mult -> mult -> Prop:=
 | m_00 : mult_op zero zero zero
 | m_10 : mult_op one zero one
 | m_01 : mult_op zero one one
 | m_ωω : mult_op omega omega omega.
-                 
-Notation "c == a • b" := (mult_op a b c) (at level 50, left associativity).
 
-Instance Join_mult : Join mult := mult_op.
-
-Variant hal : mult → Prop :=
-| halz : hal zero
-| halo : hal omega.
-
-(*
-Lemma mult_eq_dec : forall (X Y : mult), {X = Y} + {X <> Y}.
-Proof.
-  decide equality.
-Qed.
-*)
-
-(* Monoidal properties *)
-Lemma mult_unit : forall a, exists u, mult_op u a a.
-Proof.
-  intros. destruct a; hauto l: on .
-Qed.
-
-Lemma mult_hal_unit : forall {a b c : mult}, mult_op a b c -> hal a -> b = c.
+Lemma join_is_mult_op : forall (x y z : mult),
+    join x y z <-> mult_op x y z.
 Proof.
   sauto.
 Qed.
 
-(* Property mult_hal_unit2 : forall a, hal a -> forall b, mult_op a b b.
-Proof. sauto. Qed. *)
-
-Lemma mult_op_comm: forall (a b c : mult), mult_op a b c -> mult_op b a c.
-Proof.
-  sauto lq: on.
-  (* intros. destruct a; destruct b; reflexivity. *)
-Qed.
-
-Lemma mult_func : forall α₁ α₂ α α', mult_op α₁ α₂ α → mult_op α₁ α₂ α' → α = α'.
-  sauto lq: on.
-Qed.
-
-Lemma mult_canc : forall α₁ α₂ α α₂', mult_op α₁ α₂ α → mult_op α₁ α₂' α → α₂ = α₂'.
-  sauto lq: on.
-Qed.
-
-Instance mult_Canc_alg : @Canc_alg mult mult_op.
-  unfold Canc_alg.
-  sauto lq: on.
-Qed.
-
-Lemma mult_op_assoc: forall a b c d e,
-  mult_op a b d -> mult_op d c e ->
-  exists f, mult_op b c f /\ mult_op a f e.
-Proof.
-  intros a b c d e H1 H2.
-  inversion H1; subst; inversion H2; subst; eauto using mult_op.
-Qed.
-
-Lemma join_positivity: forall a a' b b', mult_op a a' b -> mult_op b b' a -> a=b.
-Proof.
-sauto lq: on .
-Qed.
-
-Lemma mult_op_assoc' : forall a b c d e,
-  mult_op a b d -> mult_op d c e ->
-  {f : mult & mult_op b c f /\ mult_op a f e}.
-Proof.
-  intros a b c d e H1 H2;
-  destruct a, b, c, d, e;
-
-  try match goal with
-  | [ H : mult_op zero one zero |- _ ] =>
-      assert (~ mult_op zero one zero); [ unfold not; intro X; inversion X; auto | intuition ]
-  | [ H : mult_op one zero zero |- _ ] =>
-      assert (~ mult_op one zero zero); [ unfold not; intro X; inversion X; auto | intuition ]
-  | [ H : mult_op zero zero one |- _ ] =>
-      assert (~ mult_op zero zero one); [ unfold not; intro X; inversion X; auto | intuition ]
-  | [ H : mult_op one one zero |- _ ] =>
-      assert (~ mult_op one one zero); [ unfold not; intro X; inversion X; auto | intuition ]
-  | [ H : mult_op one one one |- _ ] =>
-      assert (~ mult_op one one one); [ unfold not; intro X; inversion X; auto | intuition ]
-  | [ |- {f : mult & mult_op zero zero f /\ mult_op zero f zero} ] =>
-      eexists; exact (conj m_00 m_00)
-  | [ |- {f : mult & mult_op zero zero f /\ mult_op one f one} ] =>
-      eexists; exact (conj m_00 m_10)
-  | [ |- {f : mult & mult_op zero one f /\ mult_op zero f one} ] =>
-      eexists; exact (conj m_01 m_01)
-  | [ |- {f : mult & mult_op one zero f /\ mult_op zero f one} ] =>
-      eexists; exact (conj m_10 m_01)
-  | [ H : mult_op zero zero omega |- _ ] =>
-      assert (~ mult_op zero zero omega); [ intro X; inversion X | intuition ]
-  | [ H : mult_op zero one omega |- _ ] =>
-      assert (~ mult_op zero one omega); [ intro X; inversion X | intuition ]
-  | [ H : mult_op zero omega zero |- _ ] =>
-      assert (~ mult_op zero omega zero); [ intro X; inversion X | intuition ]
-  | [ H : mult_op zero omega one |- _ ] =>
-      assert (~ mult_op zero omega one); [ intro X; inversion X | intuition ]
-  | [ H : mult_op zero omega omega |- _ ] =>
-      assert (~ mult_op zero omega omega); [ intro X; inversion X | intuition ]
-  | [ H : mult_op one zero omega |- _ ] =>
-      assert (~ mult_op one zero omega); [ intro X; inversion X | intuition ]
-  | [ H : mult_op one one omega |- _ ] =>
-      assert (~ mult_op one one omega); [ intro X; inversion X | intuition ]
-  | [ H : mult_op one omega zero |- _ ] =>
-      assert (~ mult_op one omega zero); [ intro X; inversion X | intuition ]
-  | [ H : mult_op one omega one |- _ ] =>
-      assert (~ mult_op one omega one); [ intro X; inversion X | intuition ]
-  | [ H : mult_op one omega omega |- _ ] =>
-      assert (~ mult_op one omega omega); [ intro X; inversion X | intuition ]
-  | [ H : mult_op omega zero zero |- _ ] =>
-      assert (~ mult_op omega zero zero); [ intro X; inversion X | intuition ]
-  | [ H : mult_op omega zero one |- _ ] =>
-      assert (~ mult_op omega zero one); [ intro X; inversion X | intuition ]
-  | [ H : mult_op omega zero omega |- _ ] =>
-      assert (~ mult_op omega zero omega); [ intro X; inversion X | intuition ]
-  | [ H : mult_op omega one zero |- _ ] =>
-      assert (~ mult_op omega one zero); [ intro X; inversion X | intuition ]
-  | [ H : mult_op omega one one |- _ ] =>
-      assert (~ mult_op omega one one); [ intro X; inversion X | intuition ]
-  | [ H : mult_op omega one omega |- _ ] =>
-      assert (~ mult_op omega one omega); [ intro X; inversion X | intuition ]
-  | [ H : mult_op omega omega zero |- _ ] =>
-      assert (~ mult_op omega omega zero); [ intro X; inversion X | intuition ]
-  | [ H : mult_op omega omega one |- _ ] =>
-      assert (~ mult_op omega omega one); [ intro X; inversion X | intuition ]
-  end.
-
-  - hauto.
-Qed.
-
-(*
-Class Perm_alg (t: Type) {J: Join t} : Type :=
-  mkPerm   {
-   join_eq: forall {x y z z'}, join x y z -> join x y z' -> z = z';
-   join_assoc: forall {a b c d e}, join a b d -> join d c e ->
-                    {f : t & join b c f /\ join a f e};
-   join_comm: forall {a b c}, join a b c -> join b a c;
-   join_positivity: forall {a a' b b'}, join a a' b -> join b b' a -> a=b
-}.
-*)
-
-Instance Perm_alg_mult : Perm_alg mult :=
-  @mkPerm mult Join_mult
-    mult_func        (* join_eq *)
-    mult_op_assoc'   (* join_assoc *)
-    mult_op_comm     (* join_comm *)
-    join_positivity. (* join_positivity *)
-
-(* Proving mult is a Sep Algebra, not that we need it *)
-
-(* unit property for sep alg, seems false (DZ: it is false)
-Lemma mult_unit_sep: exists u, forall a, mult_op u a a.
-Proof.
-  exists zero. intros. destruct a.
-  - best.
-  - best.
-Qed.
-
-Lemma mult_unit_sep_unique: exists ! u, forall a, mult_op u a a.
-Proof.
-  sauto lq: on use: mult_canc.
-Qed.
-*)
-
-Definition mult_op_sub (a c : mult) : Prop :=
-    exists b, mult_op a b c.
-Notation "a ⊑ c" := (mult_op_sub a c) (at level 70, no associativity).
-
-Definition mcore (m: mult) : mult :=
-  match m with
-  | zero => zero
-  | one => zero
-  | omega => omega
-  end.
-
-Lemma mcore_unit: forall t, unit_for (mcore t) t.
-Proof.
-  sauto l: on.
-  Qed.
-
-Lemma join_mcore_sub: forall (a b c : mult), mult_op a b c -> mult_op_sub (mcore a) (mcore c).
-Proof.
-  sauto lq: on .
-Qed.
-
-Lemma mcore_idem : forall a, mcore (mcore a) = mcore a.
-Proof.
-  	sauto lq: on.
-Qed.
-
-(*
-  Class Sep_alg A {J: Join A} : Type :=
-    {
-      core: A -> A;
-      core_unit: forall t, unit_for (core t) t;
-      (* weaker core axioms *)
-      join_core_sub: forall {a b c}, join a b c -> join_sub (core a) (core c);
-      core_idem : forall a, core (core a) = core a
-    }.
-*)
+Instance mult_Perm_alg : Perm_alg mult :=
+  Perm_sum _ _ _ _ purely_linear.Perm_alg_mult structural.Perm_mult.
 
 Instance mult_Sep_alg : Sep_alg mult :=
-  {
-    core := mcore;
-    core_unit := mcore_unit;
-    join_core_sub := join_mcore_sub;
-    core_idem := mcore_idem
-  }.
+  Sep_sum _ _ _ _ _ _ purely_linear.mult_Sep_alg structural.Sep_mult.
+
+Variant hal : mult -> Prop :=
+  | halz : hal zero
+  | halo : hal omega.
+
+Definition hal_core : mult -> Prop := fun m => m = (core m).
+
+Lemma hal_is_core: forall x, hal x <-> hal_core x.
+Proof.
+  sauto.
+Qed.

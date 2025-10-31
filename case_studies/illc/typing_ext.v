@@ -23,8 +23,8 @@ Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
 
   | t_VarL :
       forall (Δ' : tenv n) (T : ty) (fn : fin n),
-        Δ fn = (T, one) ->
-        exh _ _  _ hal (update_tfctx _ _ _ Δ fn T zero) ->
+        Δ fn = (T, one) →
+        exh _ _  _ hal (update_tfctx _ _ _ Δ fn T zero) →
         has_type Δ (var_tm fn) T
 
   | t_VarI :
@@ -69,7 +69,7 @@ Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
         join Δ1 Δ2 Δ →
         has_type Δ (letbang M N) B.
 
-Notation "Δ '|-' M ':' A" := (has_type Δ M A) (at level 40).
+Notation "Δ '⊢' M ':' A" := (has_type Δ M A) (at level 40).
 
 (* ------------------------------------- *)
 (* Canonical forms lemma                 *)

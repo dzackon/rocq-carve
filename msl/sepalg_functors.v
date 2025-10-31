@@ -297,4 +297,3 @@ Section SepAlgSubset_Functor.
   Qed.
 
 End SepAlgSubset_Functor.
-

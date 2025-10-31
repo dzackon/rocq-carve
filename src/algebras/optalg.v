@@ -1,6 +1,5 @@
-Require Import VST.msl.sepalg.
-
 From Hammer Require Import Hammer.
+Require Import VST.msl.sepalg.
 
 Section OptionAlg.
   Variable A: Type.

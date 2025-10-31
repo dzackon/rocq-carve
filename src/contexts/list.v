@@ -14,21 +14,13 @@
   free properties like commutativity, associativity, cancellativity, etc.
 **)
 
-From Coq Require Import List.
+From Coq Require Import List Program.Equality.
+From Hammer Require Import Tactics.
+From VST.msl Require Import sepalg functors sepalg_functors sepalg_generators.
 Import List.ListNotations.
-
-Require Import Coq.Program.Equality.
-
-Require Import VST.msl.sepalg.
-Require Import VST.msl.functors.
-Require Import VST.msl.sepalg_functors.
-Require Import VST.msl.sepalg_generators.
-
 Import CovariantFunctor.
 Import CovariantFunctorLemmas.
 Import CovariantFunctorGenerator.
-
-From Hammer Require Import Tactics.
 
 Section ListCtx.
 
@@ -83,42 +75,6 @@ Proposition merge_is_JoinFunctor_lctx
     merge L1 L2 L3 <-> join L1 L2 L3.
 Proof.
   split; intro H; induction H; sauto.
-Qed.
-
-(* Property merge_comm'
-  {R A : Type} {JA : Join A} {PA : Perm_alg A} {SA : Sep_alg A} {Δ₁ Δ₂ Δ : lctx R A} :
-    merge Δ₁ Δ₂ Δ -> merge Δ₂ Δ₁ Δ.
-Proof.
-  intros. 
-  apply merge_is_JoinFunctor_lctx.
-  eapply (@join_comm (lctx R A)).
-  eapply (Perm_alg_lctx R A); assumption.
-  apply merge_is_JoinFunctor_lctx; assumption.
-Qed. *)
-
-(* get 'for free'? *)
-Property merge_comm
-  {R A : Type} {join: Join A} {Δ₁ Δ₂ Δ : lctx R A} :
-    merge Δ₁ Δ₂ Δ -> merge Δ₂ Δ₁ Δ.
-Admitted.
-
-(* get 'for free'? *)
-Property merge_assoc
-  {R A : Type} {join: Join A} {Δ₁ Δ₂ Δ₃ Δ₁₂ Δ : lctx R A} :
-    merge Δ₁ Δ₂ Δ₁₂ -> merge Δ₁₂ Δ₃ Δ ->
-      exists (Δ₂₃ : lctx R A),
-        merge Δ₂ Δ₃ Δ₂₃ /\ merge Δ₁ Δ₂₃ Δ.
-Admitted.
-
-Corollary merge_assoc2
-  {R A : Type} {join: Join A} {Δ₁ Δ₂ Δ₃ Δ₁₂ Δ : lctx R A} :
-    merge Δ₁ Δ₂ Δ₁₂ -> merge Δ₁₂ Δ₃ Δ ->
-      exists (Δ₁₃ : lctx R A),
-        merge Δ₁ Δ₃ Δ₁₃ /\ merge Δ₁₃ Δ₂ Δ.
-Proof.
-  intros μ1 μ2.
-  destruct (merge_assoc (merge_comm μ1) μ2) as [Δ₁₃ [μ3 μ4]].
-  exists Δ₁₃. split; [ | apply merge_comm]; assumption.
 Qed.
 
 Inductive exh {R A: Type} (hal : A -> Prop) : lctx R A -> Prop :=

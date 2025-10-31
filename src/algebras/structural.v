@@ -2,9 +2,7 @@
 algebra is given by the trivial monoid on unit. *)
 
 From Coq Require Import Unicode.Utf8.
-
-Require Import VST.msl.sepalg.
-Require Import VST.msl.sepalg_generators.
+From VST.msl Require Import sepalg sepalg_generators.
 
 Definition mult : Type := unit.
 
