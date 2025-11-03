@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Try to detect Coq / Rocq version
+if command -v rocq >/dev/null 2>&1; then
+    # Rocq >= 9.0.0
+    echo "Generating Makefile..."
+    rocq makefile -f _CoqProject -o Makefile
+elif command -v coqc >/dev/null 2>&1; then
+    # Rocq < 9.0.0
+    echo "Generating Makefile..."
+    coq_makefile -f _CoqProject -o Makefile
+else
+    echo "Error: Rocq not found. Please install."
+    exit 1
+fi
+
+echo "Makefile generated. You may now run 'make' to build the project."
