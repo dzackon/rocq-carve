@@ -190,7 +190,7 @@ Fixpoint Reduce (T : ty) (w : val) : Prop :=
   | Ty_Arrow T1 T2 =>
     match w with
     | closure η <{/\ t1}> =>
-        forall a, Reduce T1 a → exists b, eval (a :: η) t1 b /\ Reduce T2 b
+        forall a, Reduce T1 a → exists b, eval (a :: η) t1 b ∧ Reduce T2 b
     | _ => False
     end
   end.
@@ -211,7 +211,7 @@ Notation "Δ '~~' η" := (REG Δ η) (at level 40).
 
 (*Semantic typing for terms *)
 Definition Valid (Δ : tenv) (t : tm) (T : ty) : Prop :=
-  forall η, REG Δ η → exists a, eval η t a /\ Reduce T a.
+  forall η, REG Δ η → exists a, eval η t a ∧ Reduce T a.
 
 Notation "Gamma '|=' t ':' T" := (Valid Gamma t T) (at level 40).
 
@@ -220,8 +220,7 @@ Hint Unfold Valid : core.
 Lemma REG_preservation1: forall Δ1 Δ2 Δ,
     join Δ1 Δ2 Δ → forall η, Δ ~~ η → Δ1 ~~ η.
 Proof.
-  intros Δ1 Δ2 Δ H.
-  induction H; intros.
+  intros * H. induction H; intros.
   - inv H; constructor.
   - inv H1. destruct x; constructor. now eapply IHlist_join. inv H0; sauto.
 Qed.
@@ -234,10 +233,9 @@ Qed.
 
 Lemma REG_lookup: forall Δ η,
     Δ ~~ η → forall Δ' n m m' T, updn Δ n T T m m' Δ' →
-    exists W, lookup_venv n W η /\ W ∈ T.
+    exists W, lookup_venv n W η ∧ W ∈ T.
 Proof.
-  intros * RR.
-  induction RR.
+  intros * RR. induction RR.
   - sauto. (* impossible cases *)
   - intros * U. dependent destruction U; sauto lq: on.
 Qed.
@@ -250,7 +248,7 @@ Qed.
 Lemma fundamental: forall Δ t T, has_type Δ t T → Valid Δ t T.
 Proof.
   unfold Valid.
-  intros Δ t A H. induction H; intros η Rel.
+  intros Δ t ? H. induction H; intros η Rel.
   - (* unit *) eexists; split; econstructor.
   - (* var *) 
     eapply REG_lookup in Rel.

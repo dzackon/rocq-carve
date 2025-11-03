@@ -118,7 +118,7 @@ Proof.
   - (* app *)
     right. inversion H; subst.
     apply join_emptyT in H5; sintuition.
-    destruct (IHM1 M1 eq_refl JMeq_refl (Fun T2  T) H2).
+    destruct (IHM1 M1 eq_refl JMeq_refl (Fun T2 T) H2).
     + (* t1 is a value *)
       apply canonical_forms_fun in H2; [ | assumption].
       destruct H2 as [x [t H2]]; subst.

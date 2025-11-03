@@ -67,7 +67,7 @@ Lemma Halts_backwards_closed :
     Halts M' →
     Halts M.
 Proof.
-intros M M' Hs Hh.
+intros ? ? ? Hh.
   destruct Hh as [V Hms Hn].
   eapply Halts_c.
   - eapply starSE; eauto.
@@ -90,7 +90,7 @@ Lemma Reduce_backwards_closed :
     Reduce A M.
 Proof.
   (* structural induction on the type A, matching the Fixpoint Reduce *)
-  induction A as [| A1 IHA1 A2 IHA2]; intros M M' Hs Hred.
+  induction A as [| ? ? ? IHA2]; intros M M' Hs Hred.
   - (* A = ty_Unit *)
     cbn in *.
     eapply Halts_backwards_closed; eauto.
@@ -127,8 +127,7 @@ Lemma RedSub_extend :
     Reduce T N →
     RedSub (scons (T, one) Δ) (scons N σ).
 Proof.
-  intros n Δ σ T N H1 H2 x.
-  unfold scons.
+  intros ? Δ ? ? ? H1 H2 x. unfold scons.
   destruct x as [x'|].
   - specialize (H1 x'). destruct (Δ x'). exact H1.
   - exact H2.
@@ -141,14 +140,14 @@ Lemma RedSub_split1 :
     join Δ1 Δ2 Δ →
     RedSub Δ1 σ.
 Proof.
-  intros n Δ Δ1 Δ2 σ HRed Hjoin x.
+  intros ? Δ Δ1 ? ? HRed Hjoin x.
   unfold RedSub in HRed.
   specialize (HRed x).
-  destruct (Δ x) as [t m] eqn:E.
-  destruct (Δ1 x) as [t1 m1] eqn:E1.
+  destruct (Δ x) as [t ?] eqn:E1.
+  destruct (Δ1 x) as [t1 ?] eqn:E2.
   assert (Heq : t1 = t).
-  { pose proof (join_types_match x Hjoin) as [H1 H2].
-    rewrite E, E1 in H1. cbn in H1. symmetry. exact H1. }
+  { pose proof (join_types_match x Hjoin) as [H1 ?].
+    rewrite E1, E2 in H1. cbn in H1. symmetry. exact H1. }
   rewrite Heq. exact HRed.
 Qed.
 

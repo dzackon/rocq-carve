@@ -39,10 +39,10 @@ Lemma join_types_match :
     join Δ1 Δ2 Δ →
     fst (Δ x) = fst (Δ1 x) ∧ fst (Δ x) = fst (Δ2 x).
 Proof.
-  intros n Δ Δ1 Δ2 x Hjoin.
+  intros ? Δ Δ1 Δ2 x Hjoin.
   specialize (Hjoin x).
-  destruct (Δ1 x) as [t1 m1].
-  destruct (Δ2 x) as [t2 m2].
-  destruct (Δ x) as [t m].
+  destruct (Δ1 x) as [? ?].
+  destruct (Δ2 x) as [? ?].
+  destruct (Δ x) as [? ?].
   inversion Hjoin. inversion H. rewrite H1, H2. auto.
 Qed.

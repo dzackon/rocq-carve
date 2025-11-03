@@ -30,7 +30,9 @@ Definition emptyT := empty_tfctx (fin 0) _ _ (Unit, zero).
 (* -------------------------------------------- *)
 
 (* Can this go in total_fun? How? *)
-Property join_emptyT: forall Δ₁ Δ₂, join Δ₁ Δ₂ emptyT → Δ₁ = emptyT ∧ Δ₂ = emptyT.
+Property join_emptyT :
+  forall {Δ₁ Δ₂},
+    join Δ₁ Δ₂ emptyT → Δ₁ = emptyT ∧ Δ₂ = emptyT.
 Proof.
   split; apply functional_extensionality; intro x; contradiction.
 Qed.
@@ -41,12 +43,10 @@ Lemma join_types_match :
     join Δ1 Δ2 Δ →
     fst (Δ x) = fst (Δ1 x) ∧ fst (Δ x) = fst (Δ2 x).
 Proof.
-  intros n Δ Δ1 Δ2 x Hjoin.
+  intros ? Δ Δ1 Δ2 x Hjoin.
   specialize (Hjoin x).
-  destruct (Δ1 x) as [t1 m1].
-  destruct (Δ2 x) as [t2 m2].
-  destruct (Δ x) as [t m].
+  destruct (Δ1 x) as [? ?].
+  destruct (Δ2 x) as [? ?].
+  destruct (Δ x) as [? ?].
   inversion Hjoin. inversion H. rewrite H1, H2. auto.
 Qed.
-
-(* Put here other properties of interest not linked to a specific type system *)

@@ -73,7 +73,7 @@ Lemma Halts_backwards_closed :
     Halts M' →
     Halts M.
 Proof.
-  intros M M' Hs Hh.
+  intros ? ? ? Hh.
   destruct Hh as [V Hms Hn].
   eapply Halts_c.
   - eapply starSE; eauto.
@@ -119,7 +119,7 @@ Proof.
     + sauto.
     + exact (Halts_backwards_closed_mstep H0 IHclosure).
   - induction H.
-    + destruct H as [M' [Heq Hred]]; subst.
+    + destruct H as [M' [? Hred]]; subst.
       specialize (IHA M' Hred). inversion IHA; subst.
       apply (Halts_c (mstep_bang H)). assumption.
     + exact (Halts_backwards_closed_mstep H0 IHclosure).
@@ -160,11 +160,10 @@ Lemma RedSub_split1 :
     join Δ₁ Δ₂ Δ →
     RedSub Δ₁ σ.
 Proof.
-  intros n Δ Δ1 Δ2 σ HRed Hjoin x.
-  unfold RedSub in HRed.
-  specialize (HRed x).
-  destruct (Δ x) as [t m] eqn:E.
-  destruct (Δ1 x) as [t1 m1] eqn:E1.
+  intros ? Δ Δ1 ? ? HRed Hjoin x.
+  unfold RedSub in HRed. specialize (HRed x).
+  destruct (Δ x) as [t ?] eqn:E.
+  destruct (Δ1 x) as [t1 ?] eqn:E1.
   assert (Heq : t1 = t).
   { pose proof (join_types_match x Hjoin) as [H1 H2].
     rewrite E, E1 in H1. cbn in H1. symmetry. exact H1. }

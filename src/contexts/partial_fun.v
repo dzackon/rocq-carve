@@ -27,7 +27,8 @@ Section FunCtx.
   (* The following is only included to provide intuition on the fairly
   opaque definition. It is not meant to be used in any
   developments. *)
-  Proposition _explicit_Join_fctx : forall C1 C2 C3,
+  Proposition _explicit_Join_fctx :
+    forall C1 C2 C3,
       join C1 C2 C3 <-> (forall x,
                           match C1 x, C2 x, C3 x with
                           | Some a, Some b, Some c => JA a b c

@@ -1,6 +1,6 @@
 # Closures
 
-This directory contains various versions of weak normalization for a closure-based
+This subdirectory contains various versions of weak normalization for a closure-based
 presentation of the linear lambda calculus.
 The encoding is based on standard de Bruijn notation (not well scoped).
 The operational semantics is big-step and does not perform substitutions, so no shifting nor substitution lemmas are required.

@@ -73,7 +73,7 @@ Lemma lookup_functional :
   forall Δ t (ρ : env Δ) (x : Var Δ t) v1 v2,
     lookup ρ x v1 → lookup ρ x v2 → v1 = v2.
 Proof.
-  intros Δ t ρ x v1 v2 H1; revert v2.
+  intros ? ? ? ? ? v2 H1; revert v2.
   induction H1; intros v2 H2; dependent destruction H2; subst; eauto.
 Qed.
 
@@ -82,7 +82,7 @@ Lemma lookup_total :
   forall Δ t (ρ : env Δ) (x : Var Δ t),
     exists v, lookup ρ x v.
 Proof.
-  intros Δ t ρ x.
+  intros ? ? ρ x.
   induction x; dependent destruction ρ; sintuition.
 Qed.
 
@@ -127,7 +127,7 @@ Lemma eval_deterministic :
     eval ρ e v2 →
     v1 = v2.
 Proof.
-  intros Δ t ρ e v1 v2 He1.
+  intros ? ? ? ? ? v2 He1.
   generalize dependent v2.
   (* Key: dependent induction on the FIRST derivation *)
   induction He1; intros v2 He2; dependent destruction He2; try trivial.
@@ -152,9 +152,9 @@ Fixpoint Reduce (t : ty) : val t → Prop :=
   | ty_Arrow t1 t2 =>
       fun w =>
         exists Δ (e : tm (t1 :: Δ) t2) (ρ : env Δ),
-          w = VClos e ρ /\
+          w = VClos e ρ ∧
           (forall (a : val t1), @Reduce t1 a →
-             exists (b : val t2), eval (a .: ρ) e b /\ @Reduce t2 b)
+             exists (b : val t2), eval (a .: ρ) e b ∧ @Reduce t2 b)
   end.
 
 Notation "W ∈ T" := (Reduce T W) (at level 40).
@@ -168,7 +168,7 @@ Proof. hfcrush. Qed.
 Lemma RedEnv_extend {Δ t} (ρ : env Δ) (w : val t) :
   RedEnv ρ → @Reduce t w → RedEnv (w .: ρ).
 Proof.
-  intros Hρ Ha t' x v Hlk; dependent destruction Hlk; eauto.
+  intros ? ? ? ? ? Hlk; dependent destruction Hlk; eauto.
 Qed.
 
 (* -------------------------------------------- *)
@@ -178,9 +178,9 @@ Qed.
 Theorem fundamental :
   forall Δ t (e : tm Δ t) (ρ : env Δ),
     RedEnv ρ →
-    exists v, eval ρ e v /\ @Reduce t v.
+    exists v, eval ρ e v ∧ @Reduce t v.
 Proof.
-  intros Δ t e.
+  intros Δ ? e.
   (* no need of `dependent induction` *)
   induction e; intros ρ Hρ.
   - (* var *)
@@ -197,17 +197,17 @@ Proof.
       exists Δ, e, ρ. split; try reflexivity.
       intros a Ha.
       specialize (IHe (a .: ρ)).
-      destruct (IHe (RedEnv_extend Hρ Ha)) as [b [He Hb]].
+      destruct (IHe (RedEnv_extend Hρ Ha)) as [b [? ?]].
       exists b. split; assumption.
   - (* app *)
-    destruct (IHe1 ρ Hρ) as [w1 [He1 Hw1]].
+    destruct (IHe1 ρ Hρ) as [? [? Hw1]].
     destruct Hw1 as [Δ0 [e0 [ρ0 [-> Hclos]]]]. (* w1 = VClos e0 ρ0 *)
-    destruct (IHe2 ρ Hρ) as [a [He2 Ha]].
+    destruct (IHe2 ρ Hρ) as [a [? Ha]].
     specialize (Hclos a Ha).
-    destruct Hclos as [b [He3 Hb]].
+    destruct Hclos as [b [? ?]].
     exists b. split.
     + econstructor; eauto.
-    + exact Hb.
+    + assumption.
 Qed.
 
 (* -------------------------------------------- *)

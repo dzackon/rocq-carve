@@ -59,7 +59,7 @@ Section TotalFunCtx.
     forall (C : tfctx) (x : D) (r : R) (a : A),
       update_tfctx_rel C x r a (update_tfctx C x r a).
   Proof.
-    intros C x r a x'. split.
+    intros ? x ? ? x'. split.
     - intros ->. unfold update_tfctx.
       destruct (eq_dec x x) as [_|contra]; [reflexivity|contradiction].
     - intros Hneq. unfold update_tfctx.
@@ -71,7 +71,7 @@ Section TotalFunCtx.
     forall (C : tfctx) (x : D) (r : R) (a : A) (C' : tfctx),
       update_tfctx_rel C x r a C' <-> C' = update_tfctx C x r a.
   Proof.
-    intros C x r a C'. split.
+    intros ? x ? ? ?. split.
     - intros Hrel. apply functional_extensionality; intro x'.
       destruct (eq_dec x x') as [->|Hneq].
       + specialize (Hrel x') as [Hit _]. hauto unfold: update_tfctx.
@@ -93,7 +93,7 @@ Section TotalFunCtx.
       x <> y ->
       (update_tfctx C x r a) y = C y.
   Proof.
-    intros ? ? ? ? ? Hneq. unfold update_tfctx.
+    intros * Hneq. unfold update_tfctx.
     destruct (eq_dec x y) as [Heq|_]; [congruence|reflexivity].
   Qed.
 
@@ -102,14 +102,14 @@ Section TotalFunCtx.
     forall (C : tfctx) (x : D) (r : R) (a : A) (C' : tfctx),
       update_tfctx_rel C x r a C' -> C' x = (r, a).
   Proof.
-    intros C x r a C' Hrel. specialize (Hrel x) as [Hit _]. now apply Hit.
+    intros * Hrel. specialize (Hrel x) as [Hit _]. now apply Hit.
   Qed.
 
   Lemma update_tfctx_rel_miss :
     forall (C : tfctx) (x y : D) (r : R) (a : A) (C' : tfctx),
       update_tfctx_rel C x r a C' -> x <> y -> C' y = C y.
   Proof.
-    intros C x y r a C' Hrel Hneq.
+    intros * Hrel Hneq.
     specialize (Hrel y) as [_ Hmiss]. now apply Hmiss.
   Qed.
 

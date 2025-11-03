@@ -62,10 +62,10 @@ Proof.
   - (* app case *)
     right. inversion H; subst.
     apply join_emptyT in H5; sintuition.
-    destruct (IHM1 M1 eq_refl JMeq_refl (Fun T2  T) H2).
+    destruct (IHM1 M1 eq_refl JMeq_refl (Fun T2 T) H2).
     + (* t1 is a value *)
       apply canonical_forms_fun in H2; [ | assumption].
-      destruct H2 as [x [t H2]]; subst.
+      destruct H2 as [? [? ?]]; subst.
       destruct (IHM2 M2 eq_refl JMeq_refl T2 H3); [ | destruct H0]; eauto.
     + (* t1 can step *)
       destruct H0. eauto.

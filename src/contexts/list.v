@@ -17,6 +17,7 @@
 From Coq Require Import List Program.Equality.
 From Hammer Require Import Tactics.
 From VST.msl Require Import sepalg functors sepalg_functors sepalg_generators.
+
 Import List.ListNotations.
 Import CovariantFunctor.
 Import CovariantFunctorLemmas.
@@ -55,6 +56,10 @@ Section ListCtx.
 
 End ListCtx.
 
+(* -------------------------------------------- *)
+(* Inductive characterization of merge          *)
+(* -------------------------------------------- *)
+
 (**
   As a sanity check, we give an inductive characterization of lctx,
   and show that it has the same action on the join relation. We should
@@ -76,6 +81,10 @@ Proposition merge_is_JoinFunctor_lctx
 Proof.
   split; intro H; induction H; sauto.
 Qed.
+
+(* -------------------------------------------- *)
+(* Exhaustedness                                *)
+(* -------------------------------------------- *)
 
 Inductive exh {R A: Type} (hal : A -> Prop) : lctx R A -> Prop :=
 | exh_n : exh hal []
@@ -106,6 +115,10 @@ Proof.
   intros. induction H; sauto.
 Qed.
 
+(* -------------------------------------------- *)
+(* Update                                       *)
+(* -------------------------------------------- *)
+
 Inductive updn {R A : Type} :
   lctx R A -> nat -> R -> R -> A -> A -> lctx R A -> Prop :=
 | updn_t : forall (Δ : lctx R A) (X X' : R) (α α' : A),
@@ -131,4 +144,67 @@ Property upd_exh_inv
     (s = t) /\ (Δ' = (s', α') :: Δ).
 Proof.
   sauto.
+Qed.
+
+(* -------------------------------------------- *)
+(* Permutations                                 *)
+(* -------------------------------------------- *)
+
+From Coq Require Import Sorting.Permutation.
+
+Property perm_join {R A : Type} {JA : Join A} :
+  forall {Δ₁ Δ₂ Δ Δ' : lctx R A} ,
+    Permutation Δ Δ' ->
+    join Δ₁ Δ₂ Δ ->
+    exists Δ₁' Δ₂',
+      Permutation Δ₁ Δ₁' /\
+      Permutation Δ₂ Δ₂' /\
+      join Δ₁' Δ₂' Δ'.
+Proof.
+  intros Δ₁ Δ₂ Δ Δ' P M. revert Δ₁ Δ₂ M.
+  induction P; intros.
+  - (* perm_nil *)
+    inversion M. exists [], []. repeat split; constructor.
+  - (* perm_skip *)
+    inversion M as [ | x1 x2 ? ? ? ? ? M1].
+    destruct (IHP _ _ M1) as (Δ₁' & Δ₂' & ? & ? & ?).
+    exists (x1 :: Δ₁'), (x2 :: Δ₂').
+    repeat split; econstructor; auto.
+  - (* perm_swap *)
+    inversion M as [ | x1 x2 ? ? ? ? ?
+                   [ | y1 y2 ? Δ₁' Δ₂' ? ? ?]].
+    exists (y1 :: x1 :: Δ₁'), (y2 :: x2 :: Δ₂').
+    repeat split; constructor; sauto.
+  - (* perm_trans *)
+    destruct (IHP1 _ _ M) as (? & ? & ? & ? & M1).
+    destruct (IHP2 _ _ M1) as (Δ₁' & Δ₂' & ? & ? & ?).
+    exists Δ₁', Δ₂'.
+    repeat split; try eapply Permutation_trans; eauto.
+Qed.
+
+Lemma perm_upd :
+  forall {A R} {join : Join A} {Γ Γ' : lctx R A},
+    Permutation Γ Γ' ->
+    forall {A B α β Δ},
+      upd Γ A B α β Δ ->
+      exists Δ', Permutation Δ Δ' /\ upd Γ' A B α β Δ'.
+Proof.
+  intros. dependent induction H.
+  + (* nil *) strivial.
+  + (* skip *) sauto.
+  + (* swap *) sauto.
+  + (* trans *)
+    intros.
+    destruct (IHPermutation1 _ _ _ _ _ H1) as [? [? U]].
+    destruct (IHPermutation2 _ _ _ _ _ U) as [?Δ' [? ?]].
+    exists Δ'; hauto use: perm_trans.
+Qed.
+
+Lemma perm_exh :
+  forall {A R} {join : Join A} {hal : A -> Prop} {Δ Δ' : lctx R A},
+    Permutation Δ Δ' ->
+    exh hal Δ ->
+    exh hal Δ'.
+Proof.
+  intros. induction H; sauto.
 Qed.

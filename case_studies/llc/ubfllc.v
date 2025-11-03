@@ -75,7 +75,7 @@ Proof.
     destruct s; try contradiction.
     intros k zeta v Hv.
     cbn in H.
-    destruct (H k (xi >> zeta) v Hv) as (w & Hmstep & Hw).
+    destruct (H k (xi >> zeta) v Hv) as (w & ? & ?).
     exists w. split; eauto. asimpl. eauto.
 Qed.
 
@@ -114,13 +114,12 @@ Lemma G_split1 :
     join Δ1 Δ2 Δ →
     G Δ1 σ.
 Proof.
-  intros n k Δ Δ1 Δ2 σ HRed Hjoin x.
-  unfold G in HRed.
-  specialize (HRed x).
-  destruct (Δ x) as [t m] eqn:E.
-  destruct (Δ1 x) as [t1 m1] eqn:E1.
+  intros ? ? Δ Δ1 ? ? HRed Hjoin x.
+  unfold G in HRed. specialize (HRed x).
+  destruct (Δ x) as [t ?] eqn:E.
+  destruct (Δ1 x) as [t1 ?] eqn:E1.
   assert (Heq : t1 = t).
-  { pose proof (join_types_match x Hjoin) as [H1 H2].
+  { pose proof (join_types_match x Hjoin) as [H1 ?].
     rewrite E, E1 in H1. cbn in H1. symmetry. exact H1. }
   rewrite Heq. exact HRed.
 Qed.
@@ -154,8 +153,7 @@ Lemma EL_halts :
   forall A {M : tm 0},
     E_ (L A) M → Halts M.
 Proof.
-  intros A M [v [Hmv HLv]].
-  destruct A.
+  intros A ? [v [? HLv]]. destruct A.
   - destruct HLv as [w [Hvw Hvalw]].
   hfcrush use: mstep_trans.
   - destruct v; try contradiction.
@@ -182,7 +180,7 @@ Proof.
     { unfold G. intros [x'|]; cbn.
       - specialize (HG x'). now apply L_ren.
       - exact Hv. }
-    destruct (IHHT _ _ HG') as (v' & Hmstep & Hv').
+    destruct (IHHT _ _ HG') as (v' & Hmstep & ?).
     exists v'. repeat split; auto.
     assert (Hsub : ren_tm xi = subst_tm (xi >> @var_tm k')).
     { extensionality s. apply rinstInst'_tm. }
@@ -191,12 +189,12 @@ Proof.
   - (* t_App *)
     destruct (G_split HG H) as (D1 & D2).
     (* Apply IHs to get values *)
-    destruct (IHHT1 k σ D1) as (v1 & Hmstep1 & Hv1).
-    destruct (IHHT2 k σ D2) as (v2 & Hmstep2 & Hv2).
+    destruct (IHHT1 k σ D1) as (v1 & ? & Hv1).
+    destruct (IHHT2 k σ D2) as (v2 & ? & Hv2).
     (* v1 must be a lambda *)
     destruct v1; try contradiction.
     (* Apply the lambda to v2 *)
-    destruct (Hv1 k id v2 Hv2) as (v & Hmstep & Hv).
+    destruct (Hv1 k id v2 Hv2) as (v & ? & ?).
     exists v; split; eauto. asimpl.
     enough (star step (app (lam t v1) v2) v).
     + eapply star_trans.
