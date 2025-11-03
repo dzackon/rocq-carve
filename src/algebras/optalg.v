@@ -2,11 +2,11 @@ From Hammer Require Import Hammer.
 Require Import VST.msl.sepalg.
 
 Section OptionAlg.
-  Variable A: Type.
-  Variable JA: Join A.
-  Variable PA: Perm_alg A.
-  Variable SA: Sep_alg A.
-  Variable CA: Canc_alg A.
+  Variable A  : Type.
+  Variable JA : Join A.
+  Variable PA : Perm_alg A.
+  Variable SA : Sep_alg A.
+  Variable CA : Canc_alg A.
 
   #[global] Instance Join_opt : Join (option A) :=
     (fun (x y z: option A) =>

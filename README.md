@@ -3,7 +3,8 @@
 CARVe is a Rocq library for mechanizing substructural logics and languages. 
 
 ## Requirements
-- [Rocq 8.20.0](https://rocq-prover.org/)
+- [Rocq Prover](https://rocq-prover.org/) (tested ≥ 8.20 and ≤ 9.0)
+- [`hammer` tool for Rocq](https://rocq-prover.org/p/coq-hammer/)
 
 ## External links
 

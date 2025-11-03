@@ -41,7 +41,7 @@ Variant hal : mult -> Prop :=
 
 Definition hal_core : mult -> Prop := fun m => m = (core m).
 
-Lemma hal_is_core: forall x, hal x <-> hal_core x.
+Lemma hal_is_core : forall x, hal x <-> hal_core x.
 Proof.
   sauto.
 Qed.

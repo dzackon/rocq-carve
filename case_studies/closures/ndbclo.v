@@ -29,10 +29,10 @@ Inductive ty : Type :=
 
 (* Terms *)
 Inductive tm : Type :=
-| var   : nat → tm
-| app   : tm → tm → tm
-| abs   : tm → tm
-| ut    : tm.
+| var : nat → tm
+| app : tm → tm → tm
+| abs : tm → tm
+| ut  : tm.
 
 (* Notation *)
 Declare Custom Entry stlc.

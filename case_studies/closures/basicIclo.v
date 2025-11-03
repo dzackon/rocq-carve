@@ -25,10 +25,10 @@ Inductive Var : tenv → ty → Type :=
 | SVAR : forall Δ t t', Var Δ t → Var (t' :: Δ) t.
 
 Inductive tm (Δ : tenv) : ty → Type :=
-| var  : forall t, Var Δ t → tm Δ t
-| ut   : tm Δ ty_Unit
-| abs  : forall t1 t2, tm (t1 :: Δ) t2 → tm Δ (ty_Arrow t1 t2)
-| app  : forall t1 t2, tm Δ (ty_Arrow t1 t2) → tm Δ t1 → tm Δ t2.
+| var : forall t, Var Δ t → tm Δ t
+| ut  : tm Δ ty_Unit
+| abs : forall t1 t2, tm (t1 :: Δ) t2 → tm Δ (ty_Arrow t1 t2)
+| app : forall t1 t2, tm Δ (ty_Arrow t1 t2) → tm Δ t1 → tm Δ t2.
 
 Arguments ZVAR {Δ t}.
 Arguments SVAR {Δ t t'} _.

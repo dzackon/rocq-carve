@@ -7,8 +7,8 @@ Import CovariantFunctorLemmas.
 Import CovariantFunctorGenerator.
 
 Inductive mult : Type :=
-| zero : mult (* used *)
-| one : mult. (* available linearly *)
+| zero : mult  (* used *)
+| one  : mult. (* available linearly *)
 
 Inductive mult_op : mult -> mult -> mult -> Prop:=
 | m_00 : mult_op zero zero zero
