@@ -1,10 +1,6 @@
-From Coq Require Import List Lia Program.Equality Unicode.Utf8.
+From Coq Require Import List Program.Equality Unicode.Utf8.
 From Hammer Require Import Tactics.
-From VST.msl Require Import sepalg functors sepalg_functors sepalg_generators.
-Import List.ListNotations.
-Import CovariantFunctor.
-Import CovariantFunctorLemmas.
-Import CovariantFunctorGenerator.
+From VST.msl Require Import sepalg.
 
 Inductive mult : Type :=
 | zero : mult  (* used *)
@@ -148,17 +144,6 @@ Lemma mcore_idem : forall a, mcore (mcore a) = mcore a.
 Proof.
   intros [|];reflexivity.
 Qed.
-
-(*
-  Class Sep_alg A {J: Join A} : Type :=
-    {
-      core: A -> A;
-      core_unit: forall t, unit_for (core t) t;
-      (* weaker core axioms *)
-      join_core_sub: forall {a b c}, join a b c -> join_sub (core a) (core c);
-      core_idem : forall a, core (core a) = core a
-    }.
-*)
 
 Instance mult_Sep_alg : Sep_alg mult :=
   {

@@ -2,9 +2,8 @@
 (* Intrinsically typed _intutionistic_ case                *)
 (* ======================================================= *)
 
-From Coq Require Import Lia List Unicode.Utf8.
+From Coq Require Import List Program.Equality Unicode.Utf8.
 From Hammer Require Import Tactics.
-Require Import Coq.Program.Equality.
 Import ListNotations.
 
 Set Implicit Arguments.

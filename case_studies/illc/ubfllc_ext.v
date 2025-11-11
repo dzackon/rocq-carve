@@ -3,11 +3,11 @@
 (* ======================================================= *)
 
 (* Imports *)
-From Coq Require Import Lia Logic.FunctionalExtensionality Program.Equality Logic.JMeq Unicode.Utf8.
+From Coq Require Import Logic.FunctionalExtensionality Unicode.Utf8.
 From Hammer Require Import Hammer.
-From VST.msl Require Import sepalg functors.
+From VST.msl Require Import sepalg.
 From CARVe Require Import contexts.total_fun algebras.dill.
-From Autosubst Require Import ARS core fintype fintype_axioms  stlc_ext step_ext.
+From Autosubst Require Import ARS core fintype fintype_axioms stlc_ext step_ext.
 Require Import tenv_ext typing_ext.
 Import ScopedNotations.
 

@@ -7,9 +7,9 @@ following K. Stark (https://www.ps.uni-saarland.de/~kstark/thesis/website/Chapte
 **)
 
 (* Imports *)
-From Coq Require Import Lia Logic.FunctionalExtensionality Unicode.Utf8.
+From Coq Require Import Logic.FunctionalExtensionality Unicode.Utf8.
 From Hammer Require Import Hammer.
-From VST.msl Require Import sepalg functors.
+From VST.msl Require Import sepalg.
 From CARVe Require Import contexts.total_fun algebras.purely_linear.
 From Autosubst Require Import ARS core fintype stlc step.
 Import ScopedNotations.

@@ -10,10 +10,10 @@ hence no shifting nor substitution lemma is required.
 We prove subject reduction and weak normalization.
 **)
 
-From Coq Require Import Lia List Program.Equality Unicode.Utf8.
+From Coq Require Import List Program.Equality Unicode.Utf8.
 Import List.ListNotations.
 From Hammer Require Import Tactics.
-From VST.msl Require Import functors sepalg.
+From VST.msl Require Import sepalg.
 From CARVe Require Import contexts.list algebras.purely_linear.
 
 Ltac inv H := inversion H; subst; clear H; trivial.

@@ -16,12 +16,8 @@
 
 From Coq Require Import List Program.Equality.
 From Hammer Require Import Tactics.
-From VST.msl Require Import sepalg functors sepalg_functors sepalg_generators.
-
+From VST.msl Require Import sepalg sepalg_generators.
 Import List.ListNotations.
-Import CovariantFunctor.
-Import CovariantFunctorLemmas.
-Import CovariantFunctorGenerator.
 
 Section ListCtx.
 

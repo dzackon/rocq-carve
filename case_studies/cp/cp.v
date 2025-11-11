@@ -13,7 +13,7 @@
 From Coq Require Import List Program.Equality Sets.Permut Sorting.Permutation.
 From Coq.Unicode Require Import Utf8 Utf8_core.
 From Hammer Require Import Tactics.
-Require Import VST.msl.sepalg.
+From VST.msl Require Import sepalg.
 From CARVe Require Import contexts.list algebras.purely_linear.
 
 (* -------------------------------------------- *)
