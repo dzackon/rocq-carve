@@ -87,19 +87,6 @@ Inductive exh {R A: Type} (hal : A -> Prop) : lctx R A -> Prop :=
 | exh_c : forall {Δ : lctx R A} (X : R) {α : A},
     exh hal Δ -> hal α -> exh hal ((X, α) :: Δ).
 
-(* Not sure that we need lctx_exh, but as an experiment, we can write
-exh as a functional program. *)
-Definition lctx_exh {R A : Type} (hal : A -> Prop) : lctx R A -> Prop :=
-  fold_right (fun ra p => and (hal (snd ra)) p) True.
-
-Lemma exh_lctx_exh :
-  forall R A hal (ctx : lctx R A),
-    exh hal ctx <-> lctx_exh hal ctx.
-Proof.
-  intros; split; intro; simpl in ctx.
-  + induction H; sfirstorder.
-  + induction ctx; hauto.
-Qed.
 
 Lemma exh_id  :
   forall {A R} {join : Join A} {hal : A -> Prop} {Δ₁ Δ₂ Δ : lctx R A},
