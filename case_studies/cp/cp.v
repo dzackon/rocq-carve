@@ -14,7 +14,7 @@ From Coq Require Import List Program.Equality Sets.Permut Sorting.Permutation.
 From Coq.Unicode Require Import Utf8 Utf8_core.
 From Hammer Require Import Tactics.
 From VST.msl Require Import sepalg.
-From CARVe Require Import contexts.list algebras.purely_linear.
+From CARVe Require Import contexts.list algebras.linear.
 
 (* -------------------------------------------- *)
 (* Definitions and basic properties             *)
@@ -40,21 +40,21 @@ Definition dual (A : ty) : ty := (* Fixpoint *)
   | ⊥ => 𝟙
   end.
 
-Lemma dual_involution : forall A, dual (dual A) = A.
-Proof.
-  induction A; strivial.
-Qed.
+Lemma dual_involutive : forall A, dual (dual A) = A.
+Proof. induction A; strivial. Qed.
 
-(* We use list-based contexts where mult is CARVe's purely_linear algebra. *)
+(* We use list-based contexts where mult is CARVe's linear algebra. *)
 Definition ctx := lctx ty mult.
+#[global] Arguments upd_rel {R A} _ _.
+#[global] Arguments exh {R A} _ _.
 
 Inductive has_type : process → ctx → Prop :=
-| has_close : forall {G G'},
-    upd G 𝟙 𝟙 one zero G' →
+| has_close : forall {G G' n},
+    upd_rel G n (𝟙, one) (𝟙, zero) G' →
     exh hal G' →
     has_type close G
-| has_wait : forall {G G' : ctx} {P : process},
-    upd G ⊥ ⊥ one zero G' →
+| has_wait : forall {G G' : ctx} {n} {P : process},
+    upd_rel G n (⊥, one) (⊥, zero) G' →
     has_type P G' →
     has_type (wait P) G
 | has_cut : forall {G G1 G2 : ctx} {A : ty} {P1 P2 : process},
@@ -125,12 +125,11 @@ Theorem perm_has_type :
 Proof.
   intros * P ? H. revert Γ' P.
   induction H; intros ? ?P.
-  - destruct (perm_upd P H) as (? & ? & ?).
+  - destruct (perm_upd_rel _ _ P H) as (? & ? & ? & ?).
     hauto use: perm_exh, has_close.
-  - destruct (perm_upd P0 H) as (? & P1 & ?).
-    specialize (IHhas_type _ P1).
-    hauto use: has_wait.
-  - destruct (perm_join P H) as (? & ? & P3 & P4 & H').
+  - destruct (perm_upd_rel _ _ P0 H) as (? & ? & ? & P1).
+    specialize (IHhas_type _ P1); hauto use: has_wait.
+  - destruct (perm_join _ _ _ _ _ _ _ P H) as (? & ? & P3 & P4 & H').
     apply (has_cut H' (IHhas_type1 _ (perm_skip (A, one) P3))
                       (IHhas_type2 _ (perm_skip (dual A, one) P4))).
 Qed.
@@ -142,8 +141,8 @@ Theorem weak_has_type :
     forall {A α}, hal α → has_type P ((A, α) :: Γ).
 Proof.
   intros * H. induction H.
-  - intros; refine (@has_close ((A, α) :: G) ((A, α) :: G') _ _); hauto.
-  - intros; refine (@has_wait ((A, α) :: G) ((A, α) :: G') _ _ _); hauto.
+  - intros; refine (@has_close ((A, α) :: G) ((A, α) :: G') (S n) _ _); hauto.
+  - intros; refine (@has_wait ((A, α) :: G) ((A, α) :: G') (S n) _ _ _); hauto.
   - intros. 
     assert (has_type P1 ((A, one) :: (A0, α) :: G1)) as ?TP1;
       [ sauto use: perm_has_type, perm_swap | ].
@@ -250,13 +249,11 @@ Ltac applyr_cong H :=
 
 (* The following lemma is useful for ruling out impossible cases. *)
 (* Remark: special case of `upd_exh_inv` in list.v *)
-Lemma upd_exh {A B} {G G' : ctx} :
-  upd ((A, one) :: G) B B one zero G' →
+Lemma upd_exh {n A B} {G G' : ctx} :
+  upd_rel ((A, one) :: G) n (B, one) (B, zero) G' →
   exh hal G' →
   A = B ∧ exh hal G.
-Proof.
-  intros U ?; dependent induction U; sauto.
-Qed.
+Proof. intros U E; dependent induction U; sauto. Qed.
 
 Theorem progress (P Q : process) (G : ctx) :
   has_type (cut P Q) G → exists R, reduction (cut P Q) R.

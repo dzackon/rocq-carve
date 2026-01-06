@@ -807,8 +807,8 @@ Module Extra.
   Arguments app {n_tm}.
   Arguments bang {n_tm}.
   Arguments letbang {n_tm}.
-  #[global]Hint Opaque subst_tm: rewrite.
-  #[global]Hint Opaque ren_tm: rewrite.
+  #[global] Hint Opaque subst_tm: rewrite.
+  #[global] Hint Opaque ren_tm: rewrite.
 End Extra.
 
 Module interface.

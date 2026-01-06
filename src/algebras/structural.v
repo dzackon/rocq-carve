@@ -1,12 +1,11 @@
 (** This file contains an algebra for structural contexts, where the
 algebra is given by the trivial monoid on unit. *)
 
-From Coq Require Import Unicode.Utf8.
 From VST.msl Require Import sepalg sepalg_generators.
 
 Definition mult : Type := unit.
 
-  Variant hal : mult → Prop :=
+  Variant hal : mult -> Prop :=
   | halo : hal tt.
 
   Instance Join_mult : Join mult := Join_unit.

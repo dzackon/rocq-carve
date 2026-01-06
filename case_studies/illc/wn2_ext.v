@@ -23,9 +23,7 @@ Definition mstep {n} (s t : tm n) := star step s t.
 Lemma mstep_trans :
   forall {n} {s1 s2 s3 : tm n},
     mstep s1 s2 → mstep s2 s3 → mstep s1 s3.
-Proof.
-  unfold mstep in *. eauto using star_trans.
-Qed.
+Proof. unfold mstep in *. eauto using star_trans. Qed.
 
 Inductive Halts : tm 0 → Prop :=
 | Halts_c :
@@ -97,21 +95,21 @@ Proof.
     destruct s; try contradiction.
     intros k zeta v Hv.
     cbn in H.
-    destruct (H k (xi >> zeta) v Hv) as (w & Hmstep & ?).
+    destruct (H k (xi >> zeta) v Hv) as (w & Hmstep & Hw).
     exists w. split; auto.
     asimpl. exact Hmstep.
 
   - (* Bang case *)
-    intros. destruct H as [? [e [? HE]] | ? ? Hcl Hstep]; subst.
-    + apply CRed. exists (ren_tm xi e). split.
+    intros. destruct H as [e [e' [He' HE]] | e e' Hcl Hstep]; subst.
+    + apply CRed. exists (ren_tm xi e'). split.
       * reflexivity.
       * destruct HE as (v & Hmv & HLv).
         exists (ren_tm xi v). split.
         -- substify. eapply mstep_inst. exact Hmv.
         -- apply IHA. exact HLv.
-    + destruct (closure_reaches_R Hcl) as (_ & Hmt & e & -> & HE).
-      eapply CStep with (bang (ren_tm xi e)).
-      * apply CRed. exists (ren_tm xi e). split.
+    + destruct (closure_reaches_R Hcl) as (_ & Hmt & e'' & -> & HE).
+      eapply CStep with (bang (ren_tm xi e'')).
+      * apply CRed. exists (ren_tm xi e''). split.
         -- reflexivity.
         -- destruct HE as (v & Hmv & HLv).
            exists (ren_tm xi v). split.
@@ -140,15 +138,11 @@ Definition has_ty_sem {m} (Δ : tenv m) (s : tm m) (A : ty) : Prop :=
 
 Lemma val_inclusion {m} A (e : tm m) :
   L A e → E_ (L A) e.
-Proof.
-  sauto lq: on.
-Qed.
+Proof. sauto lq: on. Qed.
 
 (* G holds for the empty context and identity substitution *)
 Lemma G_empty : G emptyT (fun x => var_tm x).
-Proof.
-  intros x. destruct x.
-Qed.
+Proof. intros x. destruct x. Qed.
 
 Lemma G_extend :
   forall {n k} {Δ : tenv n} {σ : fin n → tm k} {v : tm k} {T : ty} (m : mult),
@@ -169,12 +163,13 @@ Lemma G_split1 :
     join Δ1 Δ2 Δ →
     G Δ1 σ.
 Proof.
-  intros ? ? Δ Δ1 ? ? HRed Hjoin x.
-  unfold G in HRed. specialize (HRed x).
-  destruct (Δ x) as [t ?] eqn:E.
-  destruct (Δ1 x) as [t1 ?] eqn:E1.
+  intros n k Δ Δ1 Δ2 σ HRed Hjoin x.
+  unfold G in HRed.
+  specialize (HRed x).
+  destruct (Δ x) as [t m] eqn:E.
+  destruct (Δ1 x) as [t1 m1] eqn:E1.
   assert (Heq : t1 = t).
-  { pose proof (join_types_match x Hjoin) as [H1 ?].
+  { pose proof (merge_pointwise_fun _ _ _ _ Hjoin x) as [H1 H2].
     rewrite E, E1 in H1. cbn in H1. symmetry. exact H1. }
   rewrite Heq. exact HRed.
 Qed.
@@ -184,9 +179,7 @@ Corollary G_split :
     G Δ σ →
     join Δ1 Δ2 Δ →
     G Δ1 σ ∧ G Δ2 σ.
-Proof.
-  eauto using G_split1, join_comm.
-Qed.
+Proof. eauto using G_split1, join_comm. Qed.
 
 (* Remark: same proof as for RedSub *)
 Lemma lookup_G :
@@ -220,15 +213,15 @@ Proof.
     + constructor.
 
   - (* Fun case *)
-    destruct H as (v & Hmv & ?).
+    destruct H as (v & Hmv & HL).
     destruct v; try contradiction.
     exists (lam t v).
     + exact Hmv.
     + constructor.
 
   - (* Bang case *)
-    destruct H as (? & Hmv & HL).
-    destruct (closure_reaches_R HL) as (? & Hmv' & ? & -> & w & Hmw & HLw).
+    destruct H as (v & Hmv & HL).
+    destruct (closure_reaches_R HL) as (v' & Hmv' & e & -> & w & Hmw & HLw).
     specialize (IHA w (val_inclusion A w HLw)).
     destruct IHA.
     exists (bang V).
@@ -261,7 +254,7 @@ Proof.
 
   - (* t_ElimUnit *)
     destruct (G_split HG H) as (G1 & G2).
-    destruct (IHHT1 _ _ G1) as (? & Hm1 & HL1).
+    destruct (IHHT1 _ _ G1) as (v1 & Hm1 & HL1).
     destruct (IHHT2 _ _ G2) as (v2 & Hm2 & HL2).
     exists v2. split.
     + eapply mstep_trans.
@@ -279,7 +272,7 @@ Proof.
     { unfold G. intros [x'|]; cbn.
       - specialize (HG x'). now apply L_ren.
       - exact Hv. }
-    destruct (IHHT _ _ HG') as (v' & Hmstep & ?).
+    destruct (IHHT _ _ HG') as (v' & Hmstep & Hv').
     exists v'. repeat split; auto.
     assert (Hsub : ren_tm xi = subst_tm (xi >> @var_tm k')).
     { extensionality s. apply rinstInst'_tm. }
@@ -293,7 +286,7 @@ Proof.
     (* v1 must be a lambda *)
     destruct v1; try contradiction.
     (* Apply the lambda to v2 *)
-    destruct (Hv1 k id v2 Hv2) as (v & ? & ?).
+    destruct (Hv1 k id v2 Hv2) as (v & Hmstep & Hv).
     exists v; split; eauto. asimpl.
     enough (star step (app (lam t v1) v2) v).
     + eapply star_trans.
@@ -313,7 +306,7 @@ Proof.
   - (* t_LetBang *)
     destruct (G_split HG H) as (G1 & G2).
     (* apply IHHT1 *)
-    destruct (IHHT1 _ _ G1) as (v & Hm_v & ?).
+    destruct (IHHT1 _ _ G1) as (v & Hm_v & HL_v).
     (* invoke closure property of L (Bang A) *)
     assert (HR : closure (fun e => exists e', e = bang e' ∧ E_ (L A) e') v)
       by sauto.
@@ -321,7 +314,7 @@ Proof.
       as (_ & Hm_v' & v' & -> & e & Hm_e & HL_e).
     (* extend G2, apply IHHT2 *)
     assert (G2' := G_extend omega G2 HL_e).
-    destruct (IHHT2 _ _ G2') as (? & Hm_w & HL_w).  
+    destruct (IHHT2 _ _ G2') as (w & Hm_w & HL_w).  
     (* conclude case *)
     eexists. split. 
     + cbn.

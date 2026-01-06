@@ -6,7 +6,7 @@ Inductive mult : Type :=
 | zero : mult  (* used *)
 | one  : mult. (* available linearly *)
 
-Inductive mult_op : mult -> mult -> mult -> Prop:=
+Inductive mult_op : mult -> mult -> mult -> Prop :=
 | m_00 : mult_op zero zero zero
 | m_10 : mult_op one zero one
 | m_01 : mult_op zero one one.
@@ -18,64 +18,42 @@ Instance Join_mult : Join mult := mult_op.
 Variant hal : mult → Prop :=
 | halz : hal zero.
 
-(* Lemma mult_eq_dec : forall (X Y : mult), {X = Y} + {X <> Y}.
-Proof.
-  decide equality.
-Qed. *)
+Lemma mult_eq_dec : forall (X Y : mult), {X = Y} + {X <> Y}.
+Proof. decide equality. Qed.
 
 (* Monoidal properties *)
+
 Lemma mult_unit : forall a, exists u, mult_op u a a.
-Proof.
-  intros. destruct a; hauto l: on .
-Qed.
+Proof. intros. destruct a; hauto l: on . Qed.
 
 Lemma mult_hal_unit : forall {a b c : mult}, mult_op a b c -> hal a -> b = c.
-Proof.
-  sauto.
-Qed.
+Proof. sauto. Qed.
 
-(* Property mult_hal_unit2 : forall a, hal a -> forall b, mult_op a b b.
-Proof.
-  sauto.
-Qed. *)
-
-Lemma mult_op_comm: forall (a b c : mult), mult_op a b c -> mult_op b a c.
-Proof.
-  sauto lq: on.
-Qed.
+Lemma mult_op_comm : forall (a b c : mult), mult_op a b c -> mult_op b a c.
+Proof. sauto lq: on. Qed.
 
 Lemma mult_func : forall α₁ α₂ α α', mult_op α₁ α₂ α → mult_op α₁ α₂ α' → α = α'.
-  sauto lq: on.
-Qed.
+Proof. sauto lq: on. Qed.
 
 Lemma mult_canc : forall α₁ α₂ α α₂', mult_op α₁ α₂ α → mult_op α₁ α₂' α → α₂ = α₂'.
-  sauto lq: on.
-Qed.
+Proof. sauto lq: on. Qed.
 
 Instance mult_Canc_alg : @Canc_alg mult mult_op.
-  unfold Canc_alg.
-  sauto lq: on.
-Qed.
+Proof. unfold Canc_alg. sauto lq: on. Qed.
 
-Lemma mult_op_assoc: forall a b c d e,
+Lemma mult_op_assoc : forall a b c d e,
   mult_op a b d -> mult_op d c e ->
   exists f, mult_op b c f /\ mult_op a f e.
-Proof.
-  intros a b c d e H1 H2.
-  inversion H1; subst; inversion H2; subst; eauto using mult_op.
-Qed.
+Proof. intros * H1 H2; inversion H1; subst; inversion H2; eauto using mult_op. Qed.
 
-Lemma join_positivity: forall a a' b b', mult_op a a' b -> mult_op b b' a -> a=b.
-Proof.
-sauto lq: on .
-Qed.
+Lemma join_positivity : forall a a' b b', mult_op a a' b -> mult_op b b' a -> a=b.
+Proof. sauto lq: on . Qed.
 
 Lemma mult_op_assoc' : forall a b c d e,
   mult_op a b d -> mult_op d c e ->
   {f : mult & mult_op b c f /\ mult_op a f e}.
 Proof.
-  intros a b c d e H1 H2;
-  destruct a, b, c, d, e;
+  intros a b c d e ? ?; destruct a, b, c, d, e;
     try match goal with
       | [ H : mult_op zero one zero |- _ ] => assert (~ mult_op zero one zero); [ unfold not; intro X; inversion X; auto | intuition]
       | [ H : mult_op one zero zero |- _ ] => assert (~ mult_op one zero zero); [ unfold not; intro X; inversion X; auto | intuition]
@@ -89,17 +67,6 @@ Proof.
       end.
 Qed.
 
-(*
-Class Perm_alg (t: Type) {J: Join t} : Type :=
-  mkPerm   {
-   join_eq: forall {x y z z'}, join x y z -> join x y z' -> z = z';
-   join_assoc: forall {a b c d e}, join a b d -> join d c e ->
-                    {f : t & join b c f /\ join a f e};
-   join_comm: forall {a b c}, join a b c -> join b a c;
-   join_positivity: forall {a a' b b'}, join a a' b -> join b b' a -> a=b
-}.
-*)
-
 Instance Perm_alg_mult : Perm_alg mult :=
   @mkPerm mult Join_mult
     mult_func        (* join_eq *)
@@ -109,46 +76,32 @@ Instance Perm_alg_mult : Perm_alg mult :=
 
 (* Proving mult is a separation algebra *)
 
-(* unit property for separation algebra (see Dockins) *)
-Lemma mult_unit_sep: exists u, forall a, mult_op u a a.
-Proof.
-  exists zero. intros. destruct a; hauto l: on .
-Qed.
+Lemma mult_unit_sep : exists u, forall a, mult_op u a a.
+Proof. exists zero. intros. destruct a; hauto l: on . Qed.
 
-Lemma mult_unit_sep_unique: exists ! u, forall a, mult_op u a a.
-Proof.
-  sauto lq: on use: mult_canc.
-Qed.
+Lemma mult_unit_sep_unique : exists ! u, forall a, mult_op u a a.
+Proof. sauto lq: on use: mult_canc. Qed.
 
-Definition mult_op_sub (a c : mult) : Prop :=
-    exists b, mult_op a b c.
+Definition mult_op_sub (a c : mult) : Prop := exists b, mult_op a b c.
 Notation "a ⊑ c" := (mult_op_sub a c) (at level 70, no associativity).
 
-Definition mcore (m: mult) : mult :=
+Definition mcore (m : mult) : mult :=
   match m with
   | zero => zero
   | one => zero
   end.
 
 Lemma mcore_unit: forall t, unit_for (mcore t) t.
-Proof.
-  intros [|]; constructor.
-Qed.
+Proof. intros [|]; constructor. Qed.
 
 Lemma join_mcore_sub: forall (a b c : mult), mult_op a b c -> mult_op_sub (mcore a) (mcore c).
-Proof.
-  sauto lq: on .
-Qed.
+Proof. sauto lq: on . Qed.
 
 Lemma mcore_idem : forall a, mcore (mcore a) = mcore a.
-Proof.
-  intros [|];reflexivity.
-Qed.
+Proof. intros [|]; reflexivity. Qed.
 
 Instance mult_Sep_alg : Sep_alg mult :=
-  {
-    core := mcore;
+  { core := mcore;
     core_unit := mcore_unit;
     join_core_sub := join_mcore_sub;
-    core_idem := mcore_idem
-  }.
+    core_idem := mcore_idem }.

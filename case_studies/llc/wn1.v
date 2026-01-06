@@ -6,7 +6,7 @@
 From Coq Require Import Unicode.Utf8.
 From Hammer Require Import Hammer.
 From VST.msl Require Import sepalg.
-From CARVe Require Import contexts.total_fun algebras.purely_linear.
+From CARVe Require Import contexts.total_fun algebras.linear.
 From Autosubst Require Import ARS core fintype stlc step.
 Require Import tenv typing.
 Import ScopedNotations.
@@ -24,10 +24,10 @@ Definition mstep {n} (s t : tm n) := star step s t.
 
 Inductive Halts : tm 0 → Prop :=
 | Halts_c :
-    forall (M V : tm 0),
+    ∀ (M V : tm 0),
       mstep M V → value V → Halts M.
 
-Lemma Halts_lam : forall T e,
+Lemma Halts_lam : ∀ T e,
   Halts (lam T e).
 Proof.
   intros T e.
@@ -49,7 +49,7 @@ Fixpoint Reduce (A : ty) (M : tm 0) : Prop :=
       Halts M ∧
       (* 2) closure under application to any reducible argument,
             along any context split *)
-      (forall (N : tm 0),
+      (∀ (N : tm 0),
          Reduce A1 N →
          Reduce A2 (Core.app M N))
   end.
@@ -62,7 +62,7 @@ Notation "M ∈ A" := (Reduce A M) (at level 40).
 
 (* Halts is backwards closed w.r.t. one step *)
 Lemma Halts_backwards_closed :
-  forall (M M' : tm 0),
+  ∀ (M M' : tm 0),
     step M M' →
     Halts M' →
     Halts M.
@@ -76,7 +76,7 @@ Qed.
 
 (* Reducible terms halt *)
 Lemma reduce_halts :
-  forall A {M : tm 0},
+  ∀ A {M : tm 0},
     Reduce A M → Halts M.
 Proof.
   induction A; cbn in *; sfirstorder.
@@ -84,7 +84,7 @@ Qed.
 
 (* Main lemma: Reduce is backwards closed w.r.t. one step *)
 Lemma Reduce_backwards_closed :
-  forall A (M M' : tm 0),
+  ∀ A (M M' : tm 0),
     step M M' →
     Reduce A M' →
     Reduce A M.
@@ -114,7 +114,7 @@ Qed.
 
 Definition RedSub {n} (Δ : tenv n) : (fin n → tm 0) → Prop :=
   fun σ =>
-    forall (x : fin n),
+    ∀ (x : fin n),
       let (ty, mult) := Δ x in
       Reduce ty (σ x).
 
@@ -122,7 +122,7 @@ Lemma RedSub_nil : RedSub emptyT (fun x => var_tm x).
 Proof. sauto. Qed.
 
 Lemma RedSub_extend :
-  forall {n} {Δ : tenv n} {σ : fin n → tm 0} {T : ty} {N : tm 0},
+  ∀ {n} {Δ : tenv n} {σ : fin n → tm 0} {T : ty} {N : tm 0},
     RedSub Δ σ →
     Reduce T N →
     RedSub (scons (T, one) Δ) (scons N σ).
@@ -135,7 +135,7 @@ Qed.
 
 (* If RedSub Δ σ and Δ = Δ₁ ⋈ Δ₂, then RedSub Δ₁ σ and RedSub Δ₂ σ *)
 Lemma RedSub_split1 :
-  forall {n} {Δ Δ1 Δ2 : tenv n} {σ : fin n → tm 0},
+  ∀ {n} {Δ Δ1 Δ2 : tenv n} {σ : fin n → tm 0},
     RedSub Δ σ →
     join Δ1 Δ2 Δ →
     RedSub Δ1 σ.
@@ -146,31 +146,28 @@ Proof.
   destruct (Δ x) as [t ?] eqn:E1.
   destruct (Δ1 x) as [t1 ?] eqn:E2.
   assert (Heq : t1 = t).
-  { pose proof (join_types_match x Hjoin) as [H1 ?].
+  { pose proof (merge_pointwise_fun _ _ _ _ Hjoin x) as [H1 ?].
     rewrite E1, E2 in H1. cbn in H1. symmetry. exact H1. }
   rewrite Heq. exact HRed.
 Qed.
 
 Corollary RedSub_split :
-  forall {n} {Δ Δ1 Δ2 : tenv n} {σ : fin n → tm 0},
+  ∀ {n} {Δ Δ1 Δ2 : tenv n} {σ : fin n → tm 0},
     RedSub Δ σ →
     join Δ1 Δ2 Δ →
     RedSub Δ1 σ ∧ RedSub Δ2 σ.
-Proof.
-  eauto using join_comm, RedSub_split1.
-Qed.
+Proof. eauto using join_comm, RedSub_split1. Qed.
 
 Lemma lookup_redsub :
-  forall {n} {Δ : tenv n} {x : fin n} {t : ty} {m : mult}
-         (σ : fin n → tm 0),
+  ∀ {n} {Δ : tenv n} {x : fin n} {t : ty} {m : mult} (σ : fin n → tm 0),
     RedSub Δ σ ->
-    @lookup_tfctx _ _ _ Δ x = (t, m) ->
+    @lookup _ _ _ Δ x = (t, m) ->
     Reduce t (σ x).
 Proof.
   intros * HRed Hlook.
   unfold RedSub in HRed.
   specialize (HRed x).
-  unfold lookup_tfctx in *.
+  unfold lookup in *.
   now rewrite Hlook in HRed.
 Qed.
 
@@ -179,7 +176,7 @@ Qed.
 (* -------------------------------------------- *)
 
 Lemma fund :
-  forall {n} {Δ : tenv n} {M : tm n} {A : ty} (σ : fin n → tm 0),
+  ∀ {n} {Δ : tenv n} {M : tm n} {A : ty} (σ : fin n → tm 0),
     has_type Δ M A →
     RedSub Δ σ →
     Reduce A M[σ].
@@ -203,7 +200,7 @@ Qed.
 (* -------------------------------------------- *)
 
 Lemma weak_norm :
-  forall {M : tm 0} {A : ty},
+  ∀ {M : tm 0} {A : ty},
     has_type emptyT M A →
     Halts M.
 Proof.
