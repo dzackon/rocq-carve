@@ -49,15 +49,11 @@ Proof. intros ->. now constructor. Qed.
 Lemma step_mstep :
   forall {n} {s1 s2 : tm n},
     step s1 s2 -> star step s1 s2.
-Proof.
-  eauto.
-Qed.
+Proof. eauto. Qed.
   
 Lemma mstep_elimunit n (s1 s2 t1 t2 : tm n) :
   star step s1 s2 -> star step t1 t2 -> star step (elimunit s1 t1) (elimunit s2 t2).
-Proof with eauto.
-  intros ms. induction 1. induction ms... auto...
-Qed.
+Proof with eauto. intros ms. induction 1. induction ms... auto... Qed.
 
 Lemma mstep_lam n A (s t : tm (S n)) :
   star step s t -> star step (lam A s) (lam A t).
@@ -118,10 +114,7 @@ Qed.
 Lemma mstep_beta_lam n (s1 s2 : tm (S n)) (t1 t2 : tm n) :
   star step s1 s2 -> star step t1 t2 ->
   star step (s1 [t1..]) (s2 [t2..]).
-Proof.
-  intros st1 st2. apply mstep_subst; [assumption|].
-  now intros [|].
-Qed.
+Proof. intros st1 st2. apply mstep_subst; [assumption|]. now intros [|]. Qed.
 
 Lemma step_naturality m n (M: tm m) (rho: fin m -> fin n) M' :
   step (M ⟨rho⟩) M' -> exists M'', step M M'' /\ M' = (M'' ⟨rho⟩).
@@ -185,6 +178,4 @@ Fixpoint value {m} (e : tm m) : Prop :=
 
 Lemma value_anti {m n} (xi : fin m -> fin n) (s : tm m) :
   value (s⟨xi⟩) -> value s.
-Proof.
-  induction s; eauto. apply IHs.
-Qed.
+Proof. induction s; eauto. apply IHs. Qed.

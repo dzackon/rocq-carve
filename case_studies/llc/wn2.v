@@ -10,7 +10,7 @@ following K. Stark (https://www.ps.uni-saarland.de/~kstark/thesis/website/Chapte
 From Coq Require Import Logic.FunctionalExtensionality Unicode.Utf8.
 From Hammer Require Import Hammer.
 From VST.msl Require Import sepalg.
-From CARVe Require Import contexts.total_fun algebras.purely_linear.
+From CARVe Require Import contexts.total_fun algebras.linear.
 From Autosubst Require Import ARS core fintype stlc step.
 Import ScopedNotations.
 Require Import tenv typing.
@@ -23,7 +23,7 @@ Definition mstep {n} (s t : tm n) := star step s t.
 
 (* DZ: can we just invoke `star_trans` directly? *)
 Lemma mstep_trans :
-  forall {n} {s1 s2 s3 : tm n},
+  ∀ {n} {s1 s2 s3 : tm n},
     mstep s1 s2 → mstep s2 s3 → mstep s1 s3.
 Proof.
   unfold mstep in *. eauto using star_trans.
@@ -31,7 +31,7 @@ Qed.
 
 Inductive Halts {n} : tm n → Prop :=
 | Halts_c :
-  forall (M V : tm n),
+  ∀ (M V : tm n),
     mstep M V → value V → Halts M.
 
 (* -------------------------------------------- *)
@@ -49,7 +49,7 @@ Fixpoint L {m} (A : ty) : tm m → Prop :=
   | Fun A1 A2 => fun e =>
       match e with
       | lam _ s =>
-          forall k (xi : fin m → fin k) v,
+          ∀ k (xi : fin m → fin k) v,
             L A1 v →
             E_ (L A2) (subst_tm (scons v (xi >> var_tm)) s)
       | _ => False
@@ -85,11 +85,11 @@ Qed.
 
 (* G: a substitution σ is good for context Δ (as RedSub but open) *)
 Definition G {m k} (Δ : tenv m) : (fin m → tm k) → Prop :=
-  fun σ => forall (x : fin m), L (fst (Δ x)) (σ x).
+  fun σ => ∀ (x : fin m), L (fst (Δ x)) (σ x).
 
 (* Semantic typing: for all good substitutions, the term reduces *)
 Definition has_ty_sem {m} (Δ : tenv m) (s : tm m) (A : ty) : Prop :=
-  forall k (σ : fin m → tm k), G Δ σ → E_ (L A) s[σ].
+  ∀ k (σ : fin m → tm k), G Δ σ → E_ (L A) s[σ].
 
 (* -------------------------------------------- *)
 (* Helper lemmas                                *)
@@ -97,19 +97,15 @@ Definition has_ty_sem {m} (Δ : tenv m) (s : tm m) (A : ty) : Prop :=
 
 Lemma val_inclusion {m} A (e : tm m) :
   L A e → E_ (L A) e.
-Proof.
-  sauto lq: on.
-Qed.
+Proof. sauto lq: on. Qed.
 
 (* G holds for the empty context and identity substitution *)
 Lemma G_empty : G emptyT (fun x => var_tm x).
-Proof.
-  sauto.
-Qed.
+Proof. sauto. Qed.
 
 (* Remark: same proof as for RedSub *)
 Lemma G_split1 :
-  forall {n k} {Δ Δ1 Δ2 : tenv n} {σ : fin n → tm k},
+  ∀ {n k} {Δ Δ1 Δ2 : tenv n} {σ : fin n → tm k},
     G Δ σ →
     join Δ1 Δ2 Δ →
     G Δ1 σ.
@@ -119,30 +115,26 @@ Proof.
   destruct (Δ x) as [t ?] eqn:E.
   destruct (Δ1 x) as [t1 ?] eqn:E1.
   assert (Heq : t1 = t).
-  { pose proof (join_types_match x Hjoin) as [H1 ?].
+  { pose proof (merge_pointwise_fun _ _ _ _ Hjoin x) as [H1 ?].
     rewrite E, E1 in H1. cbn in H1. symmetry. exact H1. }
   rewrite Heq. exact HRed.
 Qed.
 
 Corollary G_split :
-  forall {n k} {Δ Δ1 Δ2 : tenv n} {σ : fin n → tm k},
+  ∀ {n k} {Δ Δ1 Δ2 : tenv n} {σ : fin n → tm k},
     G Δ σ →
     join Δ1 Δ2 Δ →
     G Δ1 σ ∧ G Δ2 σ.
-Proof.
-  eauto using G_split1, join_comm.
-Qed.
+Proof. eauto using G_split1, join_comm. Qed.
 
 (* Remark: same proof as for RedSub *)
 Lemma lookup_G :
-  forall {n k} {Δ  : tenv n} {x : fin n} {t  : ty}
+  ∀ {n k} {Δ  : tenv n} {x : fin n} {t  : ty}
          (σ : fin n → tm k),
     G Δ σ →
     fst (Δ x) = t →
     L t (σ x).
-Proof.
-  intros. unfold G in *. sauto.
-Qed.
+Proof. intros. unfold G in *. sauto. Qed.
 
 (* -------------------------------------------- *)
 (* Main lemmas                                  *)
@@ -150,7 +142,7 @@ Qed.
 
 (* Reducible terms halt *)
 Lemma EL_halts :
-  forall A {M : tm 0},
+  ∀ A {M : tm 0},
     E_ (L A) M → Halts M.
 Proof.
   intros A ? [v [? HLv]]. destruct A.
@@ -162,7 +154,7 @@ Qed.
 
 (* Fundamental lemma: If Δ ⊢ M : A, then Δ ⊨ M : A *)
 Lemma fundamental :
-  forall {m} {Δ : tenv m} {M : tm m} {A : ty},
+  ∀ {m} {Δ : tenv m} {M : tm m} {A : ty},
     has_type Δ M A → has_ty_sem Δ M A.
 Proof.
   intros * HT.
@@ -209,7 +201,7 @@ Qed.
 (* -------------------------------------------- *)
 
 Lemma weak_norm :
-  forall {M : tm 0} {A : ty},
+  ∀ {M : tm 0} {A : ty},
     has_type emptyT M A →
     Halts M.
 Proof.

@@ -20,28 +20,16 @@ Definition tenv n := tfctx (fin n) ty mult.
 
 Definition emptyT := empty_tfctx (fin 0) _ _ (Unit, zero).
 
+#[global] Arguments lookup {D R A} _ _.
+#[global] Arguments exh {D R A} _ _.
+#[global] Arguments upd {D R A H} _ _ _ _.
+
 (* -------------------------------------------- *)
 (* Properties                                   *)
 (* -------------------------------------------- *)
 
 (* If Δ₁ ⋈ Δ₂ = ⋅, then Δ₁ = Δ₂ = ⋅ *)
 Property join_emptyT :
-  forall Δ₁ Δ₂,
-    join Δ₁ Δ₂ emptyT → Δ₁ = emptyT ∧ Δ₂ = emptyT.
-Proof.
-  split; apply functional_extensionality; intro x; contradiction.
-Qed.
-
-(* If Δ₁ ⋈ Δ₂ = Δ, then types must match at each input x *)
-Lemma join_types_match :
-  forall {n} {Δ Δ1 Δ2 : tenv n} (x : fin n),
-    join Δ1 Δ2 Δ →
-    fst (Δ x) = fst (Δ1 x) ∧ fst (Δ x) = fst (Δ2 x).
-Proof.
-  intros ? Δ Δ1 Δ2 x Hjoin.
-  specialize (Hjoin x).
-  destruct (Δ1 x) as [? ?].
-  destruct (Δ2 x) as [? ?].
-  destruct (Δ x) as [? ?].
-  inversion Hjoin. inversion H. rewrite H1, H2. auto.
-Qed.
+  forall Δ1 Δ2,
+    join Δ1 Δ2 emptyT → Δ1 = emptyT ∧ Δ2 = emptyT.
+Proof. split; apply functional_extensionality; intro x; contradiction. Qed.

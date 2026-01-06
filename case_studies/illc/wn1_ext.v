@@ -22,14 +22,13 @@ Definition mstep {n} (s t : tm n) := star step s t.
 
 Inductive Halts : tm 0 → Prop :=
 | Halts_c :
-    forall (M V : tm 0),
+    ∀ (M V : tm 0),
       mstep M V → value V → Halts M.
 
 Lemma Halts_lam :
-  forall T e, Halts (lam T e).
+  ∀ T e, Halts (lam T e).
 Proof.
-  intros T e.
-  apply Halts_c with (V := lam T e).
+  intros T e. apply Halts_c with (V := lam T e).
   - apply starR.
   - simpl. exact I.
 Qed.
@@ -53,7 +52,7 @@ Fixpoint Reduce (A : ty) : tm 0 → Prop :=
     Halts M ∧
     (* 2) closure under application to any reducible argument,
           along any context split *)
-    (forall (N : tm 0),
+    (∀ (N : tm 0),
       Reduce A1 N →
       Reduce A2 (Core.app M N))
   | Bang A =>
@@ -68,7 +67,7 @@ Notation "M ∈ A" := (Reduce A M) (at level 40).
 
 (* Halts is backwards closed under single-step evaluation *)
 Lemma Halts_backwards_closed :
-  forall (M M' : tm 0),
+  ∀ (M M' : tm 0),
     step M M' →
     Halts M' →
     Halts M.
@@ -82,7 +81,7 @@ Qed.
 
 (* Halts is backwards closed under multi-step evaluation *)
 Corollary Halts_backwards_closed_mstep :
-  forall (M M' : tm 0),
+  ∀ (M M' : tm 0),
     mstep M M' →
     Halts M' →
     Halts M.
@@ -92,7 +91,7 @@ Qed.
 
 (* Reduction is backwards closed under multi-step evaluation *)
 Lemma Reduce_backwards_closed_mstep :
-  forall A (M M' : tm 0),
+  ∀ A (M M' : tm 0),
     mstep M M' →
     Reduce A M' →
     Reduce A M.
@@ -111,7 +110,7 @@ Qed.
 
 (* Reducible terms halt *)
 Lemma Reduce_halts :
-  forall A {M : tm 0},
+  ∀ A {M : tm 0},
     Reduce A M → Halts M.
 Proof.
   induction A; cbn in *; try sfirstorder; intros.
@@ -131,7 +130,7 @@ Qed.
 
 Definition RedSub {n} (Δ : tenv n) : (fin n → tm 0) → Prop :=
   fun σ =>
-    forall (x : fin n),
+    ∀ (x : fin n),
       let (ty, mult) := Δ x in
       Reduce ty (σ x).
 
@@ -141,7 +140,7 @@ Proof. intros x. inversion x. Qed.
 
 (* If RedSub Δ σ and M ∈ [A], then RedSub (Δ, A^α) (σ, M) for any α *)
 Lemma RedSub_extend :
-  forall {n} {Δ : tenv n} {σ : fin n → tm 0} {A : ty} {M : tm 0} (α : mult),
+  ∀ {n} {Δ : tenv n} {σ : fin n → tm 0} {A : ty} {M : tm 0} (α : mult),
     RedSub Δ σ →
     Reduce A M →
     RedSub (scons (A, α) Δ) (scons M σ).
@@ -155,7 +154,7 @@ Qed.
 
 (* If RedSub Δ σ and Δ = Δ₁ ⋈ Δ₂, then RedSub Δ₁ σ *)
 Lemma RedSub_split1 :
-  forall {n} {Δ Δ₁ Δ₂ : tenv n} {σ : fin n → tm 0},
+  ∀ {n} {Δ Δ₁ Δ₂ : tenv n} {σ : fin n → tm 0},
     RedSub Δ σ →
     join Δ₁ Δ₂ Δ →
     RedSub Δ₁ σ.
@@ -165,14 +164,14 @@ Proof.
   destruct (Δ x) as [t ?] eqn:E.
   destruct (Δ1 x) as [t1 ?] eqn:E1.
   assert (Heq : t1 = t).
-  { pose proof (join_types_match x Hjoin) as [H1 H2].
+  { pose proof (merge_pointwise_fun _ _ _ _ Hjoin x) as [H1 H2].
     rewrite E, E1 in H1. cbn in H1. symmetry. exact H1. }
   rewrite Heq. exact HRed.
 Qed.
 
 (* If RedSub Δ σ and Δ = Δ₁ ⋈ Δ₂, then RedSub Δ₁ σ and RedSub Δ₂ σ *)
 Corollary RedSub_split :
-  forall {n} {Δ Δ₁ Δ₂ : tenv n} {σ : fin n → tm 0},
+  ∀ {n} {Δ Δ₁ Δ₂ : tenv n} {σ : fin n → tm 0},
     RedSub Δ σ →
     join Δ₁ Δ₂ Δ →
     RedSub Δ₁ σ ∧ RedSub Δ₂ σ.
@@ -182,8 +181,8 @@ Qed.
 
 (* If RedSub Δ σ and x : t ∈ Δ, then σ(x) ∈ [t] *)
 Lemma lookup_redsub :
-  forall {n} {Δ : tenv n} {x : fin n} {t : ty}
-         {m : mult} (σ : fin n → tm 0),
+  ∀ {n} {Δ : tenv n} {x : fin n} {t : ty}
+        {m : mult} (σ : fin n → tm 0),
     RedSub Δ σ →
     Δ x = (t, m) →
     Reduce t (σ x).
@@ -199,7 +198,7 @@ Qed.
 
 (* Fundamental lemma: If Δ ⊢ M : A and RedSub Δ σ, then M[σ] ∈ [A] *)
 Lemma fund :
-  forall {n} {Δ : tenv n} {M : tm n} {A : ty} (σ : fin n → tm 0),
+  ∀ {n} {Δ : tenv n} {M : tm n} {A : ty} (σ : fin n → tm 0),
     has_type Δ M A →
     RedSub Δ σ →
     Reduce A M[σ].
@@ -249,7 +248,7 @@ Qed.
 
 (* Theorem: If ⋅ ⊢ M : A, then M halts *)
 Theorem weak_norm :
-  forall {M : tm 0} {A : ty},
+  ∀ {M : tm 0} {A : ty},
     has_type emptyT M A →
     Halts M.
 Proof.

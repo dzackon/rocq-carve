@@ -20,14 +20,14 @@ Inductive ty : Type :=
 Definition tenv := list ty.
 
 Inductive Var : tenv → ty → Type :=
-| ZVAR : forall Δ t, Var (t :: Δ) t
-| SVAR : forall Δ t t', Var Δ t → Var (t' :: Δ) t.
+| ZVAR : ∀ Δ t, Var (t :: Δ) t
+| SVAR : ∀ Δ t t', Var Δ t → Var (t' :: Δ) t.
 
 Inductive tm (Δ : tenv) : ty → Type :=
-| var : forall t, Var Δ t → tm Δ t
+| var : ∀ t, Var Δ t → tm Δ t
 | ut  : tm Δ ty_Unit
-| abs : forall t1 t2, tm (t1 :: Δ) t2 → tm Δ (ty_Arrow t1 t2)
-| app : forall t1 t2, tm Δ (ty_Arrow t1 t2) → tm Δ t1 → tm Δ t2.
+| abs : ∀ t1 t2, tm (t1 :: Δ) t2 → tm Δ (ty_Arrow t1 t2)
+| app : ∀ t1 t2, tm Δ (ty_Arrow t1 t2) → tm Δ t1 → tm Δ t2.
 
 Arguments ZVAR {Δ t}.
 Arguments SVAR {Δ t t'} _.
@@ -41,10 +41,10 @@ Notation "'U'" := ty_Unit .
 
 Inductive env : tenv → Type :=
 | ENil  : env []
-| ECons : forall Δ t, val t → env Δ → env (t :: Δ)
+| ECons : ∀ Δ t, val t → env Δ → env (t :: Δ)
 with val : ty → Type :=
 | VUnit : val ty_Unit
-| VClos : forall Δ t1 t2, tm (t1 :: Δ) t2 → env Δ → val (ty_Arrow t1 t2).
+| VClos : ∀ Δ t1 t2, tm (t1 :: Δ) t2 → env Δ → val (ty_Arrow t1 t2).
 
 Arguments ECons {Δ t} _ _.
 Arguments VClos  {Δ t1 t2} _ _.
@@ -60,16 +60,16 @@ Notation "v .: ρ" := (extend v ρ) (at level 60, right associativity).
 (* Relational lookup (typed de Bruijn indexing) *)
 (* -------------------------------------------- *)
 
-Inductive lookup : forall Δ t, env Δ → Var Δ t → val t → Prop :=
-| LZ  : forall Δ t (v : val t) (ρ : env Δ),
+Inductive lookup : ∀ Δ t, env Δ → Var Δ t → val t → Prop :=
+| LZ  : ∀ Δ t (v : val t) (ρ : env Δ),
     lookup (ECons v ρ) ZVAR v
-| LS  : forall Δ t t' (v' : val t') (ρ : env Δ) (x : Var Δ t) (v : val t),
+| LS  : ∀ Δ t t' (v' : val t') (ρ : env Δ) (x : Var Δ t) (v : val t),
     lookup ρ x v →
     lookup (ECons v' ρ) (SVAR x) v.
 
 (* Functionality of lookup *)
 Lemma lookup_functional :
-  forall Δ t (ρ : env Δ) (x : Var Δ t) v1 v2,
+  ∀ Δ t (ρ : env Δ) (x : Var Δ t) v1 v2,
     lookup ρ x v1 → lookup ρ x v2 → v1 = v2.
 Proof.
   intros ? ? ? ? ? v2 H1; revert v2.
@@ -78,8 +78,8 @@ Qed.
 
 (* Totality of lookup *)
 Lemma lookup_total :
-  forall Δ t (ρ : env Δ) (x : Var Δ t),
-    exists v, lookup ρ x v.
+  ∀ Δ t (ρ : env Δ) (x : Var Δ t),
+    ∃ v, lookup ρ x v.
 Proof.
   intros ? ? ρ x.
   induction x; dependent destruction ρ; sintuition.
@@ -90,19 +90,19 @@ Qed.
 (* (using relational lookup)                    *)
 (* -------------------------------------------- *)
 
-Inductive eval : forall (Δ : tenv) t, env Δ → tm Δ t → val t → Prop :=
+Inductive eval : ∀ (Δ : tenv) t, env Δ → tm Δ t → val t → Prop :=
 | Ev_Var :
-    forall Δ t (ρ : env Δ) (x : Var Δ t) v,
+    ∀ Δ t (ρ : env Δ) (x : Var Δ t) v,
       lookup ρ x v →
       eval ρ (var x) v
 | Ev_Ut :
-    forall Δ (ρ : env Δ),
+    ∀ Δ (ρ : env Δ),
       eval ρ (ut Δ) VUnit
 | Ev_Abs :
-    forall Δ t1 t2 (ρ : env Δ) (e : tm (t1 :: Δ) t2),
+    ∀ Δ t1 t2 (ρ : env Δ) (e : tm (t1 :: Δ) t2),
       eval ρ (abs e) (VClos e ρ)
 | Ev_App :
-    forall Δ t1 t2 (ρ : env Δ)
+    ∀ Δ t1 t2 (ρ : env Δ)
            (e1 : tm Δ (ty_Arrow t1 t2)) (e2 : tm Δ t1)
            (Δ0 : tenv) (e : tm (t1 :: Δ0) t2) (ρ0 : env Δ0)
            (varg : val t1) (vres : val t2),
@@ -121,7 +121,7 @@ Arguments eval {Δ t} _ _ _.
 (* -------------------------------------------- *)
 
 Lemma eval_deterministic :
-  forall Δ t (ρ : env Δ) (e : tm Δ t) v1 v2,
+  ∀ Δ t (ρ : env Δ) (e : tm Δ t) v1 v2,
     eval ρ e v1 →
     eval ρ e v2 →
     v1 = v2.
@@ -150,16 +150,16 @@ Fixpoint Reduce (t : ty) : val t → Prop :=
   | ty_Unit => fun _ => True
   | ty_Arrow t1 t2 =>
       fun w =>
-        exists Δ (e : tm (t1 :: Δ) t2) (ρ : env Δ),
+        ∃ Δ (e : tm (t1 :: Δ) t2) (ρ : env Δ),
           w = VClos e ρ ∧
-          (forall (a : val t1), @Reduce t1 a →
-             exists (b : val t2), eval (a .: ρ) e b ∧ @Reduce t2 b)
+          (∀ (a : val t1), @Reduce t1 a →
+             ∃ (b : val t2), eval (a .: ρ) e b ∧ @Reduce t2 b)
   end.
 
 Notation "W ∈ T" := (Reduce T W) (at level 40).
 
 Definition RedEnv (Δ : tenv) (ρ : env Δ) : Prop :=
-  forall t (x : Var Δ t) v, lookup ρ x v → Reduce v.
+  ∀ t (x : Var Δ t) v, lookup ρ x v → Reduce v.
 
 Lemma RedEnvNil : RedEnv ENil.
 Proof. hfcrush. Qed.
@@ -175,9 +175,9 @@ Qed.
 (* -------------------------------------------- *)
 
 Theorem fundamental :
-  forall Δ t (e : tm Δ t) (ρ : env Δ),
+  ∀ Δ t (e : tm Δ t) (ρ : env Δ),
     RedEnv ρ →
-    exists v, eval ρ e v ∧ @Reduce t v.
+    ∃ v, eval ρ e v ∧ @Reduce t v.
 Proof.
   intros Δ ? e.
   (* no need of `dependent induction` *)
@@ -214,11 +214,10 @@ Qed.
 (* -------------------------------------------- *)
 
 (* Totality of evaluation: The evaluation of any (well-typed) term is well-defined *)
-Corollary total:
-  forall t (e : tm [] t),
-    exists a, eval ENil e a.
+Corollary total :
+  ∀ t (e : tm [] t),
+    ∃ a, eval ENil e a.
 Proof.
-  intros.
-  specialize (@fundamental nil t e ENil RedEnvNil).
+  intros. specialize (@fundamental nil t e ENil RedEnvNil).
   sfirstorder.
 Qed.
