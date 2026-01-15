@@ -22,14 +22,14 @@ Set Implicit Arguments.
 Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
 
   | t_VarL :
-      ∀ (Δ' : tenv n) (T : ty) (fn : fin n),
-        Δ fn = (T, one) →
-        exh hal (upd Δ fn (T, zero)) →
+      ∀ {T : ty} {fn : fin n},
+        lookup Δ fn = (T, one) ->
+        exh hal (upd Δ fn (T, zero)) ->
         has_type Δ (var_tm fn) T
 
   | t_VarI :
-      ∀ (T : ty) (fn : fin n),
-        Δ fn = (T, omega) →
+      ∀ {T : ty} {fn : fin n},
+        lookup Δ fn = (T, omega) →
         exh hal Δ →
         has_type Δ (var_tm fn) T
 
@@ -38,32 +38,32 @@ Inductive has_type {n} (Δ : tenv n) : tm n → ty → Prop :=
         has_type Δ unit Unit
 
   | t_ElimUnit :
-      ∀ Δ1 Δ2 M N B,
+      ∀ {Δ1 Δ2 M N B},
         has_type Δ1 M Unit →
         has_type Δ2 N B →
         join Δ1 Δ2 Δ →
         has_type Δ (elimunit M N) B
 
   | t_Abs :
-      ∀ (T1 T2 : ty) e1,
+      ∀ {T1 T2 : ty} {e1},
         has_type (scons (T2, one) Δ) e1 T1 →
         has_type Δ (lam T2 e1) (Fun T2 T1)
 
   | t_App :
-      ∀ (Δ1 Δ2 : tenv n) (T1 T2 : ty) (e1 e2 : tm n),
+      ∀ {Δ1 Δ2 : tenv n} {T1 T2 : ty} {e1 e2 : tm n},
         has_type Δ1 e1 (Fun T2 T1) →
         has_type Δ2 e2 T2 →
         join Δ1 Δ2 Δ →
         has_type Δ (Core.app e1 e2) T1
 
   | t_Bang :
-      ∀ M A,
+      ∀ {M A},
         has_type Δ M A →
         @exh _ _ mult hal Δ →
         has_type Δ (bang M) (Bang A)
 
   | t_LetBang :
-      ∀ Δ1 Δ2 M N A B,
+      ∀ {Δ1 Δ2 M N A B},
         has_type Δ1 M (Bang A) →
         has_type (scons (A, omega) Δ2) N B →
         join Δ1 Δ2 Δ →

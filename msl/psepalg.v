@@ -37,7 +37,7 @@ Proof with eauto.
   apply no_units in H0. contradiction.
 Qed.
 
-Lemma psub_joins {A}  {JA: Join A} {PA: Perm_alg A} {Pos_A: Pos_alg A}{DA: Disj_alg A} : forall a b,
+Lemma psub_joins {A} {JA: Join A} {PA: Perm_alg A} {Pos_A: Pos_alg A}{DA: Disj_alg A} : forall a b,
   join_sub a b -> joins a b -> False.
 Proof.
   intros.
@@ -148,7 +148,7 @@ Section PSA_LIFT.
     f_equal.
   Qed.
 
-  Lemma mk_lifted_refl1: forall (a:A)  (pf1 pf2: nonunit a),
+  Lemma mk_lifted_refl1: forall (a:A) (pf1 pf2: nonunit a),
     mk_lifted pf1 = mk_lifted pf2.
   Proof.
     intros; rewrite (proof_irr pf1 pf2); auto.
@@ -420,9 +420,9 @@ Section FinitePartialMap.
 
   Definition fpm := sig finMap.
   #[local] Instance Join_fpm : Join fpm :=
-     Join_prop (A -> option B)  (Join_fun A (option B) Join_Rng) finMap.
+     Join_prop (A -> option B) (Join_fun A (option B) Join_Rng) finMap.
 
-  Definition PAF: (@Perm_alg (A -> Rng)  (Join_fun A Rng Join_Rng))
+  Definition PAF: (@Perm_alg (A -> Rng) (Join_fun A Rng Join_Rng))
   := Perm_fun _ _ _ Perm_Rng.
 
   #[local] Instance Perm_fpm : @Perm_alg fpm Join_fpm :=

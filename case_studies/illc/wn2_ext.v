@@ -50,7 +50,7 @@ Fixpoint L {m} (A : ty) : tm m → Prop :=
   match A with
   | Unit =>
       closure (fun M => M = unit)
-  | Fun A1 A2 => 
+  | Fun A1 A2 =>
     fun e =>
       match e with
       | lam _ s =>
@@ -245,7 +245,7 @@ Proof.
   - (* t_VarI *)
     exists (σ fn). split.
      + asimpl; apply starR.
-     + specialize (HG fn). rewrite H in HG. exact HG.
+     + specialize (HG fn). unfold lookup in H; rewrite H in HG. exact HG.
 
   - (* t_Unit *)
     exists unit. split.
@@ -314,9 +314,9 @@ Proof.
       as (_ & Hm_v' & v' & -> & e & Hm_e & HL_e).
     (* extend G2, apply IHHT2 *)
     assert (G2' := G_extend omega G2 HL_e).
-    destruct (IHHT2 _ _ G2') as (w & Hm_w & HL_w).  
+    destruct (IHHT2 _ _ G2') as (w & Hm_w & HL_w).
     (* conclude case *)
-    eexists. split. 
+    eexists. split.
     + cbn.
       eapply mstep_trans.
       eapply (mstep_letbang

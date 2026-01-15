@@ -81,7 +81,7 @@ Section ListCtx.
     | 0, _ :: tl => x :: tl
     | S n', hd :: tl => hd :: upd tl n' x
     end.
-  
+
   (* Update as a relation *)
   Inductive upd_rel : lctx -> nat -> R * A -> R * A -> lctx -> Prop :=
   | updrel_t : forall (l : lctx) x y,
@@ -110,7 +110,7 @@ Section ListCtx.
     match goal with
     | H : lookup [] _ = Some _ |- _ => assert (H' := nth_error_In _ _ H); inversion H'
     end.
-  
+
   (* ---------------- Properties of update ---------------- *)
 
   Lemma upd_cons l n x y :

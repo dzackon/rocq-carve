@@ -154,7 +154,7 @@ Ltac spec H :=
   match type of H with ?a -> _ =>
     let H1 := fresh in (assert (H1: a); [|generalize (H H1); clear H H1; intro H]) end.
 
-(* THIS IS OBSOLETE because of Coq's "specialize" tactic 
+(* THIS IS OBSOLETE because of Coq's "specialize" tactic
 (** Specialize a hypothesis with respect to specific terms or proofs. *)
 Tactic Notation "spec" hyp(H) :=
   match type of H with ?a -> _ =>

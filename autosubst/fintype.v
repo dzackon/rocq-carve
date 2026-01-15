@@ -306,7 +306,6 @@ Lemma scons_p_comp' X Y m n (f : fin m -> X) (g : fin n -> X) (h : X -> Y) :
 Proof.
   intros x.
   destruct (destruct_fin x) as [[x' ->]|[x' ->]].
-  (* TODO better way to solve this? *)
   - revert x'.
     apply pointwise_forall.
     change (fun x => (scons_p f g >> h) (zero_p x)) with (zero_p >> scons_p f g >> h).

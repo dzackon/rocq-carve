@@ -43,7 +43,7 @@ Corollary exchange_top_two {n} :
   ∀ {Δ : tenv n} {M : tm (S (S n))} {T : ty} {x y : ty * mult},
     has_type (x .: (y .: Δ)) M T →
     has_type (y .: (x .: Δ)) (ren_tm swap_top M) T.
-Proof. intros * Hty. rewrite <- swap_top_cons; apply (typing_ren BijectiveRenaming_swap_top Hty). Qed.
+Proof. intros * Hty. asimpl. rewrite <- swap_top_cons; apply (typing_ren BijectiveRenaming_swap_top Hty). Qed.
 
 (** Admissibility of weakening of used assumptions *)
 
@@ -55,8 +55,6 @@ Proof.
   intros * Htyp. induction Htyp.
   - eapply t_Var; [now asimpl|unfold shift; rewrite upd_some; eapply (proj1 exh_cons); sauto].
   - apply t_Abs.
-    assert (Heq : ∀ {n} {M : tm (S n)},
-      ren_tm (shift >> swap_top) M = ren_tm (var_zero .: shift >> shift) M) by sauto.
     assert (IHHtyp' := exchange_top_two IHHtyp); now asimpl in IHHtyp'.
   - eapply t_App; eauto; intros []; sauto.
 Qed.
@@ -94,11 +92,7 @@ Proof.
     destruct (IHhas_type _ _ _ eq_refl JMeq_refl JMeq_refl b' _ _ P') as (? & H' & ->).
     eexists; split.
     + apply t_Abs, H'.
-    + assert (Heq2 : ∀ {n} (σ : fin (S n) → fin (S n)),
-       (shift >> (swap_top >> (var_zero .: σ >> shift))) =
-       (var_zero .: shift >> (σ >> shift)))
-       by (intros; extensionality y; destruct y; cbn; reflexivity).
-      rewrite Heq1; unfold compose; asimpl; rewrite Heq2; reflexivity.
+    + rewrite Heq1; unfold compose, swap_top; now asimpl.
   - (* t_App *)
     assert (J1 := merge_ren _ _ _ (@ren_inv _ b) H1); rewrite P in J1.
     destruct (join_cons_inv J1) as (Eq1 & Eq2 & Jhd & Jtl).
@@ -110,7 +104,7 @@ Proof.
     destruct (IHhas_type2 _ _ _ eq_refl JMeq_refl JMeq_refl b _ _ Heq2) as (? & ? & ->).
     eexists; split.
     + eapply t_App; eassumption.
-    + now asimpl. 
+    + now asimpl.
 Qed.
 
 Corollary strengthening_top {n} :
@@ -162,22 +156,12 @@ Proof.
     rewrite P, swap_top_cons, ren_tfctx_trans, <- Heq1 in P'.
     apply (weakening_top T2) in H2.
     assert (H1' := IHhas_type _ _ _ eq_refl JMeq_refl JMeq_refl _ _ _ b' _ _ P' H2 J').
-    rewrite Heq2 in H1'; unfold compose in H1'; asimpl in H1'; unfold shift in *.
-    assert (Heq3 :
-      ∀ {n} (σ : fin (S n) → fin (S n)) (f : fin (S n) → tm (S n)) {e},
-        Some >> (swap_top >> (e .: f)) = e .: Some >> f)
-      by (intros; extensionality y; sauto).
-    assert (Heq4 :
-      ∀ {n} (σ : fin (S n) → fin (S n)) (f : fin (S n) → tm (S n)) {e},
-        (swap_top >> (e .: f)) var_zero .: σ >> (shift >> (swap_top >> (e .: f))) =
-        f var_zero .: σ >> (e .: shift >> f))
-      by sauto.
-    rewrite Heq4 in H1'; unfold shift in H1'.
-    now apply t_Abs in H1'.
+    rewrite Heq2 in H1'; unfold compose in H1'; asimpl in H1'.
+    now apply t_Abs.
   - (* t_App *)
     assert (J1 := merge_ren _ _ _ (@ren_inv _ b) H); rewrite P in J1.
     destruct (join_cons_inv J1) as (? & ? & Jhd & Jtl).
-    rewrite tenv_tail_cons in Jtl. (* inversion Jhd. *)
+    rewrite tenv_tail_cons in Jtl.
     pose proof (typing_ren_sym b H1_) as Hty1.
     pose proof (typing_ren_sym b H1_0) as Hty2.
     assert (Heq1 : ren_tfctx ren_inv Δ1 =

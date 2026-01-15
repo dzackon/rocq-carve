@@ -31,25 +31,7 @@ Section unmaps.
       join (f x) (f y) z' ->
       { y0: A & { z:A | join x y0 z /\ f y0 = f y /\ f z = z' }}.
 End unmaps.
-(*
-Implicit Arguments unmap_right.
-Implicit Arguments unmap_left.
-*)
 
-(*
-Definition Join_paf (F: functor): Type :=
-  forall A, Join (F A).
-Definition Perm_paf {F: functor} (paf_join: forall A, Join (F A)): Type :=
-  forall A: Type, Perm_alg (F A).
-Definition Sep_paf {F: functor} (paf_join: forall A, Join (F A)): Type :=
-  forall A: Type, Sep_alg (F A).
-Definition Canc_paf {F: functor} (paf_join: forall A, Join (F A)): Type :=
-  forall A: Type, Canc_alg (F A).
-Definition Disj_paf {F: functor} (paf_join: forall A, Join (F A)): Type :=
-  forall A: Type, Disj_alg (F A).
-*)
-
-(* TODO: change pafunctor, unmap_left, unmap_right into prop *)
 Record pafunctor (F: functor) (paf_join: forall A, Join (F A)): Type := Pafunctor
 {
   paf_join_hom : forall A B (f : A -> B) (g: B -> A), join_hom (fmap F f g);
@@ -160,79 +142,7 @@ Section CoFunSAFunctor.
         destruct s as [y0 [z [? [? ?]]]]...
   Qed.
 End CoFunSAFunctor.
-(*
-(* This one is not used. *)
-(* And the assumption, inj_sig, is wierd. *)
-Section SigmaSAFunctor.
-  Variable I:Type.
-  Variables (F: I -> functor).
 
-  Variables (JOIN: forall i A, Join (F i A))
-            (fSA : forall i, pafunctor (F i) (JOIN i)).
-
-  #[global] Existing Instance Join_sigma.
-
-  Hypothesis inj_sig : forall A i x y,
-    existT (fun i => F i A) i x = existT (fun i => F i A) i y -> x = y.
-
-  Lemma paf_sigma : @pafunctor (fsig F)
-                         (fun A => Join_sigma I (fun i => F i A) (fun i => JOIN i A)).
-  Proof.
-    constructor; simpl; intros.
-    hnf; simpl; intros.
-    inv H. constructor.
-    apply paf_join_hom; auto.
-
-    hnf; simpl; intros.
-    destruct x' as [xi x'].
-    destruct y as [yi y].
-    destruct z as [zi z].
-    unfold fsigma_map in H.
-    assert (xi = yi /\ yi = zi).
-    inv H; auto.
-    destruct H0. subst zi yi.
-    rename xi into i.
-    assert (join x' (fmap f y) (fmap f z)).
-    inv H; auto.
-    apply inj_sig in H2.
-    apply inj_sig in H3.
-    apply inj_sig in H4.
-    subst. auto.
-    apply paf_preserves_unmap_left in H0.
-    destruct H0 as [x [y0 [?[??]]]].
-    exists (existT (fun i => F i A) i x).
-    exists (existT (fun i => F i A) i y0).
-    intuition.
-    constructor; auto.
-    unfold fsigma_map; f_equal; auto.
-    unfold fsigma_map; f_equal; auto.
-
-    hnf; simpl; intros.
-    destruct x as [xi x].
-    destruct y as [yi y].
-    destruct z' as [zi z'].
-    assert (xi = yi /\ yi = zi).
-    inv H; auto.
-    destruct H0. subst zi yi.
-    rename xi into i.
-    assert (join (fmap f x) (fmap f y) z').
-    inv H; auto.
-    apply inj_sig in H2.
-    apply inj_sig in H3.
-    apply inj_sig in H4.
-    subst. auto.
-    apply paf_preserves_unmap_right in H0.
-    destruct H0 as [y0 [z [?[??]]]].
-    exists (existT (fun i => F i A) i y0).
-    exists (existT (fun i => F i A) i z).
-    intuition.
-    constructor; auto.
-    unfold fsigma_map; f_equal; auto.
-    unfold fsigma_map; f_equal; auto.
-  Qed.
-
-End SigmaSAFunctor.
-*)
 Section SepAlgSubset_Functor.
   Variables (F: functor).
   Variables (JOIN: forall A, Join (F A))

@@ -19,6 +19,10 @@ Section TotalFunCtx.
 
   Definition tfctx : Type := (D -> R * A).
 
+  (* Apply functions pointwise to elements of a context. *)
+  Definition map (f : R -> R) (g : A -> A) (C : tfctx) : tfctx :=
+    fun x => let (T, m) := C x in (f T, g m).
+
   (* ---------------- Algebraic structure ---------------- *)
 
   #[global] Instance Join_tfctx : Join tfctx :=
@@ -26,10 +30,10 @@ Section TotalFunCtx.
 
   #[global] Instance Perm_alg_tfctx : Perm_alg tfctx.
   Proof. sauto use: Perm_fun, Perm_prod, Perm_equiv. Defined.
-  
+
   #[global] Instance Canc_alg_tfctx : Canc_alg tfctx :=
     Canc_fun _ _ _ (Canc_prod _ (Join_equiv _) _ JA).
-  
+
   #[global] Instance Sep_alg_tfctx : Sep_alg tfctx.
   Proof. sauto use: Sep_fun, Perm_fun, Sep_prod, Perm_prod, Sep_equiv, Perm_equiv. Defined.
 
@@ -39,11 +43,34 @@ Section TotalFunCtx.
     fun C => forall r, hal (snd (C r)).
 
   Definition empty_tfctx default : tfctx := fun _ => default.
-  
+
+  (* Lift `hal` to context-level predicate **)
+  Definition core_tfctx := (map id core).
+
+  (* `core_tfctx` corresponds to core from Sep_alg instance *)
+  Property core_iff_core_tfctx :
+    core_tfctx = @core tfctx _ _.
+  Proof. extensionality C; extensionality x. unfold core_tfctx, core, Sep_alg_tfctx, map; sauto. Qed.
+
+  Property core_tfctx_exh {hal} (C : tfctx) :
+    (forall x, hal (core x)) ->
+    exh hal (core_tfctx C).
+  Proof. intros H x; unfold core_tfctx, map; sauto. Qed.
+
+  Property exh_iff_core {hal} (C : tfctx) :
+    (forall x, hal x <-> x = core x) ->
+    exh hal C <-> C = core_tfctx C.
+  Proof. intro; split; unfold core_tfctx, map; intros;
+    [extensionality z; specialize (H0 z)|rewrite H0; intro]; sauto.
+  Qed.
+
+  Property core_tfctx_unit (C : tfctx) :
+    join (core_tfctx C) C C.
+  Proof. rewrite core_iff_core_tfctx; apply core_unit. Qed.
+
   (* ---------------- Lookup / update ---------------- *)
 
-  Definition lookup : tfctx -> D -> R * A :=
-    fun C x => C x.
+  Definition lookup : tfctx -> D -> R * A := fun C x => C x.
 
   Definition upd `{EqDec D} : tfctx -> D -> (R * A) -> tfctx :=
     fun C x ra x' => if eq_dec x x' then ra else C x'.
@@ -113,6 +140,7 @@ Section TotalFunCtx.
   Proof. intros. unfold upd. destruct (eq_dec x y) as [Heq|_]; [congruence|reflexivity]. Qed.
 
   (* Same lookup facts stated via the relational view (no EqDec needed) *)
+
   Property upd_rel_hit {C x ra C'} :
     upd_rel C x ra C' -> C' x = ra.
   Proof. intros Hrel. specialize (Hrel x) as [Hit _]. now apply Hit. Qed.
@@ -123,14 +151,14 @@ Section TotalFunCtx.
 
   (* ---------------- Renaming ---------------- *)
 
-  Definition ren_tfctx (π : D -> D) (Δ : tfctx) : tfctx := fun x => Δ (π x).
+  Definition ren_tfctx (π : D -> D) (C : tfctx) : tfctx := fun x => C (π x).
 
-  Property ren_tfctx_id (Δ : tfctx) :
-    ren_tfctx id Δ = Δ.
+  Property ren_tfctx_id (C : tfctx) :
+    ren_tfctx id C = C.
   Proof. reflexivity. Qed.
 
-  Property ren_tfctx_trans (π₁ π₂ : D -> D) (Δ : tfctx) :
-    ren_tfctx π₁ (ren_tfctx π₂ Δ) = ren_tfctx (compose π₂ π₁) Δ.
+  Property ren_tfctx_trans (π₁ π₂ : D -> D) (C : tfctx) :
+    ren_tfctx π₁ (ren_tfctx π₂ C) = ren_tfctx (compose π₂ π₁) C.
   Proof. reflexivity. Qed.
 
   Property tfctx_exh_ren (π : D -> D) {C : tfctx} {hal : A -> Prop} :
@@ -140,7 +168,7 @@ Section TotalFunCtx.
   Property merge_ren {C1 C2 C : tfctx} (π : D -> D) :
     join C1 C2 C -> join (ren_tfctx π C1) (ren_tfctx π C2) (ren_tfctx π C).
   Proof. intros J; unfold ren_tfctx; split; apply J. Qed.
-  
+
   (* ---------------- Permutations ---------------- *)
 
   Class BijectiveRenaming (D : Type) :=
@@ -186,8 +214,8 @@ Section TotalFunCtx.
   |}.
 
   Property bij_ren_lookup `{BijectiveRenaming D} :
-    forall (Δ : tfctx) (x : D),
-      (ren_tfctx ren_inv Δ) (ren_fun x) = Δ x.
+    forall (C : tfctx) (x : D),
+      (ren_tfctx ren_inv C) (ren_fun x) = C x.
   Proof. intros. unfold ren_tfctx. rewrite ren_left_inv. reflexivity. Qed.
 
   Property bij_ren_tfctx_upd `{EqDec D} `{BijectiveRenaming D} :
@@ -205,7 +233,7 @@ Section TotalFunCtx.
     forall (C : tfctx) (x : D) (ra : R * A),
       ren_tfctx ren_inv (upd C x ra) = upd (ren_tfctx ren_inv C) (ren_fun x) ra .
   Proof. exact (@bij_ren_tfctx_upd _ (@BijectiveRenaming_sym H0)). Qed.
-  
+
   (* ---------------- Context merge ---------------- *)
 
   Property merge_upd `{EqDec D} {C1 C2 C : tfctx} (x : D) (r : R) {a1 a2 a : A} :
@@ -216,16 +244,16 @@ Section TotalFunCtx.
     intros HjoinC HjoinA y; unfold upd; specialize (HjoinC y).
     destruct (eq_dec x y); [split|]; eauto.
   Qed.
-    
-  Property merge_pointwise_fun {Δ Δ1 Δ2 : tfctx} :
-    join Δ1 Δ2 Δ ->
+
+  Property merge_pointwise_fun {C C1 C2 : tfctx} :
+    join C1 C2 C ->
     forall (x : D),
-      fst (Δ x) = fst (Δ1 x) /\
-      fst (Δ x) = fst (Δ2 x) /\
-      join (snd (Δ1 x)) (snd (Δ2 x)) (snd (Δ x)).
+      fst (C x) = fst (C1 x) /\
+      fst (C x) = fst (C2 x) /\
+      join (snd (C1 x)) (snd (C2 x)) (snd (C x)).
   Proof.
     intros Hjoin x; specialize (Hjoin x).
-    destruct (Δ1 x) as [t1 m1], (Δ2 x) as [t2 m2], (Δ x) as [t m].
+    destruct (C1 x), (C2 x), (C x).
     inversion Hjoin. inversion H. rewrite H1, H2. tauto.
   Qed.
 

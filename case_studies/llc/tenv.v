@@ -1,6 +1,6 @@
 (* ======================================================= *)
 (* Common type environment abbreviations for LLC           *)
-(* Note: needs constants for linear                        *)
+(* Note: needs constants for `linear`                      *)
 (* ======================================================= *)
 
 (* Imports *)
@@ -94,6 +94,13 @@ Proof. extensionality z; unfold upd; destruct (eq_dec (None : fin (S n)) z); sau
 (* Properties of exhaustedness                  *)
 (* -------------------------------------------- *)
 
+Property exh_cons {n} {Δ : tenv n} {x : ty * mult} :
+  exh hal Δ ∧ hal (snd x) ↔ exh hal (x .: Δ).
+Proof. split; [intros [H ?]|intros H].
+  - intro z. destruct z as [z'|]; asimpl; [apply (H z')|assumption].
+  - split; [intro r; specialize (H (Some r))| specialize (H None)]; auto.
+Qed.
+
 (** Zero out every multiplicity in a tenv, i.e. get unit for Δ **)
 Definition zero_tenv {n} (Δ : tenv n) : tenv n :=
   fun x => let '(T, _) := Δ x in (T, zero).
@@ -106,13 +113,6 @@ Proof. split; unfold zero_tenv; intros; [extensionality x; specialize (H x)|rewr
 
 Property zero_tenv_unit {n} (Δ : tenv n) : join Δ (zero_tenv Δ) Δ.
 Proof. unfold zero_tenv; intro; sauto. Qed.
-
-Property exh_cons {n} {Δ : tenv n} {x : ty * mult} :
-  exh hal Δ ∧ hal (snd x) ↔ exh hal (x .: Δ).
-Proof. split; [intros [H ?]|intros H].
-  - intro z. destruct z as [z'|]; asimpl; [apply (H z')|assumption].
-  - split; [intro r; specialize (H (Some r))| specialize (H None)]; auto.
-Qed.
 
 (* -------------------------------------------- *)
 (* Properties of permutations                   *)
@@ -195,16 +195,11 @@ Qed.
 (* Swapping the topmost elements of a context is a valid permutation *)
 
 Definition swap_top {n} : fin (S (S n)) → fin (S (S n)) :=
-  fun x =>
-    match x with
-    | None => Some None              (* topmost element becomes second *)
-    | Some None => None              (* second becomes topmost *)
-    | Some (Some y) => Some (Some y) (* rest unchanged *)
-    end.
+shift var_zero .: (var_zero .: shift >> shift).
 
 Property swap_top_shift {n} :
   shift >> @swap_top n = up_ren shift.
-Proof. extensionality x; destruct x; auto. Qed.
+Proof. reflexivity. Qed.
 
 Property swap_top_involutive {n} :
   compose (@swap_top n) swap_top = id.

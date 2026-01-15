@@ -62,7 +62,7 @@ Proof.
 exact (eq_trans (eq_trans eq_refl (ap (fun x => letbang m_tm x s1) H0))
          (ap (fun x => letbang m_tm t0 x) H1)).
 Qed.
-        
+
 Lemma upRen_tm_tm {m n : nat} (xi : fin m -> fin n) :
   fin (S m) -> fin (S n).
 Proof.
@@ -85,7 +85,7 @@ Fixpoint ren_tm {m_tm n_tm : nat} (xi_tm : fin m_tm -> fin n_tm)
   | lam _ s0 s1 => lam n_tm s0 (ren_tm (upRen_tm_tm xi_tm) s1)
   | bang _ s0 => bang n_tm (ren_tm xi_tm s0)
   | letbang _ s0 s1 =>
-    letbang n_tm (ren_tm xi_tm s0)  (ren_tm (upRen_tm_tm xi_tm) s1)
+    letbang n_tm (ren_tm xi_tm s0) (ren_tm (upRen_tm_tm xi_tm) s1)
   end.
 
 Lemma up_tm_tm {m n_tm : nat} (sigma : fin m -> tm n_tm) :

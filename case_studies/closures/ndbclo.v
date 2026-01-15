@@ -53,7 +53,7 @@ Inductive has_type : tenv → tm → ty → Prop :=
 | t_Unit {Δ} : exh _ _ hal Δ → has_type Δ <{unit}> Ty_Unit
 | t_Var {Δ Δ' T n} :
   lookup _ _ Δ n = Some (T, one) →
-  upd _ _ Δ n (T, zero) = Δ' → 
+  upd _ _ Δ n (T, zero) = Δ' →
   exh _ _ hal Δ' →
   has_type Δ (var n) T
 | t_Abs {Δ T1 T2 t1} :
@@ -174,9 +174,9 @@ Qed.
 (* -------------------------------------------- *)
 (* Logical relations                            *)
 (* -------------------------------------------- *)
- 
-(* Semantic Types: because of stratification we define the logical 
-    predicate as a Prop total function over types. Note: no 
+
+(* Semantic Types: because of stratification we define the logical
+    predicate as a Prop total function over types. Note: no
     'real' linearity involved. *)
 
 Fixpoint Reduce (T : ty) (w : val) : Prop :=
@@ -219,7 +219,7 @@ Proof.
   - inv H; constructor.
   - inv H1. destruct x; constructor. now eapply IHlist_join. inv H0; sauto.
 Qed.
- 
+
 Lemma REG_preservation2 {Δ1 Δ2 Δ} η :
   join Δ1 Δ2 Δ → Δ ~~ η → Δ2 ~~ η.
 Proof.
@@ -245,11 +245,11 @@ Lemma fundamental {Δ t T} : has_type Δ t T → Valid Δ t T.
 Proof.
   unfold Valid. intro H. induction H; intros η Rel.
   - (* unit *) eexists; split; econstructor.
-  - (* var *) 
+  - (* var *)
     eapply REG_lookup in Rel.
     destruct Rel. 2: eassumption.
     exists x. split.
-    + constructor. firstorder. 
+    + constructor. firstorder.
     + tauto.
   - (* abs *)
     exists (closure η <{/\ t1}>).

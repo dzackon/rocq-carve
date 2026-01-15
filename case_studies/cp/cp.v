@@ -143,7 +143,7 @@ Proof.
   intros * H. induction H.
   - intros; refine (@has_close ((A, α) :: G) ((A, α) :: G') (S n) _ _); hauto.
   - intros; refine (@has_wait ((A, α) :: G) ((A, α) :: G') (S n) _ _ _); hauto.
-  - intros. 
+  - intros.
     assert (has_type P1 ((A, one) :: (A0, α) :: G1)) as ?TP1;
       [ sauto use: perm_has_type, perm_swap | ].
     assert (has_type P2 ((dual A, one) :: (A0, α) :: G2)) as ?TP2;

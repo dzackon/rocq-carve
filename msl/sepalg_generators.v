@@ -590,7 +590,7 @@ End SepAlgSum.
  *)
 Section sa_list.
 
-  Variables (A: Type) (Ja: Join A)  (PAa: Perm_alg A).
+  Variables (A: Type) (Ja: Join A) (PAa: Perm_alg A).
 
   Inductive list_join : list A -> list A -> list A -> Prop :=
   | lj_nil : list_join nil nil nil

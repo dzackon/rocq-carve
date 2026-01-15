@@ -29,7 +29,7 @@ Definition list_ext {A B} {f g : A -> B} :
   cbn. f_equal. apply H. apply IHxs.
 Defined.
 
-Definition list_id {A}  { f : A -> A} :
+Definition list_id {A} {f : A -> A} :
   (forall x, f x = x) -> forall xs, list_map f xs = xs.
 Proof.
   intros H. induction xs. reflexivity.
@@ -101,7 +101,7 @@ Definition option_comp {A B C} {f : A -> B} {g : B -> C} {h : A -> C}:
 Proof.
   intros H. destruct p as [a|]; cbn.
   - f_equal. apply H.
-  - reflexivity. 
+  - reflexivity.
 Defined.
 
 #[export] Hint Rewrite in_map_iff : FunctorInstances.

@@ -19,7 +19,7 @@ Lemma canonical_forms_fun :
     value M →
     exists N U, M = (lam U N).
 Proof. sauto lq: on . Qed.
-  
+
 (* Canonical lemma for Unit *)
 Lemma canonical_forms_unit :
   ∀ (M : tm 0),
@@ -41,7 +41,7 @@ Proof. sauto lq: on . Qed.
 (* ------------------------------------- *)
 
 Lemma progress (M : tm 0) : ∀ T,
-  has_type emptyT M T → value M ∨ exists M', step M M'.  
+  has_type emptyT M T → value M ∨ exists M', step M M'.
 Proof.
   dependent induction M; intros; try sfirstorder.
   - (* elimunit *)

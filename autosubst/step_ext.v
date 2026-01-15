@@ -50,7 +50,7 @@ Lemma step_mstep :
   forall {n} {s1 s2 : tm n},
     step s1 s2 -> star step s1 s2.
 Proof. eauto. Qed.
-  
+
 Lemma mstep_elimunit n (s1 s2 t1 t2 : tm n) :
   star step s1 s2 -> star step t1 t2 -> star step (elimunit s1 t1) (elimunit s2 t2).
 Proof with eauto. intros ms. induction 1. induction ms... auto... Qed.
@@ -80,7 +80,7 @@ Lemma step_inst {m n} (f : fin m -> tm n) (s t : tm m) :
 Proof.
   intros st. revert n f.
   induction st; intros; cbn.
-  - auto. 
+  - auto.
   - apply step_beta_lam'. now asimpl.
   - apply step_beta_bang'. now asimpl.
   - apply step_elimunitL, IHst.

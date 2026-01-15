@@ -105,7 +105,7 @@ Proof.
       + assert (Hstep := mstep_app H (starR step N)).
         eapply IHA2.
         ** exact Hstep.
-        ** exact (Hclos N HN). 
+        ** exact (Hclos N HN).
 Qed.
 
 (* Reducible terms halt *)
@@ -204,7 +204,7 @@ Lemma fund :
     Reduce A M[σ].
 Proof.
   intros. induction H.
-  - exact (lookup_redsub H0 H). 
+  - exact (lookup_redsub H0 H).
   - exact (lookup_redsub H0 H).
   - sauto.
   - destruct (RedSub_split H0 H2) as [Hσ1 Hσ2].
@@ -223,7 +223,7 @@ Proof.
   - split.
     + apply Halts_lam.
     + intros. eapply Reduce_backwards_closed_mstep.
-      2: exact (IHhas_type _ (RedSub_extend _ H0 H1)). 
+      2: exact (IHhas_type _ (RedSub_extend _ H0 H1)).
       asimpl. apply step_mstep, step_beta_lam'. asimpl. reflexivity.
   - destruct (RedSub_split H0 H2) as [Hσ1' Hσ2'].
     destruct (IHhas_type1 σ Hσ1') as [_ Hfun].

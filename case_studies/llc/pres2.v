@@ -40,7 +40,7 @@ Corollary weakening_top {n} :
     has_type (scons (T', zero) Δ) (ren_tm shift M) T.
 Proof.
   intros * Htyp. induction Htyp.
-  - eapply t_Var; [now asimpl|].
+  - eapply t_Var; [now simpl|].
     unfold shift; rewrite upd_some; eapply (proj1 exh_cons); sauto.
   - cbn; econstructor.
     rewrite <- swap_top_shift, <- renRen_tm, <- swap_top_cons.
@@ -79,7 +79,7 @@ Proof.
 
   - (* Inductive case: n = S n' *)
     destruct Hjf as [Δt [Htail Jl0]].
-    destruct (join_cons_inv J) as (_ & _ & _ & Jtail). 
+    destruct (join_cons_inv J) as (_ & _ & _ & Jtail).
 
     (* IH on the tail *)
     assert (Hih : ∀ x,
@@ -151,7 +151,7 @@ Lemma var_family_has_type {n} (Δ : tenv n) (x : fin n) :
   snd (Δ x) = one →
   has_type (var_family Δ x) (var_tm x) (fst (Δ x)).
 Proof.
-  intros. econstructor; unfold var_family, lookup. 
+  intros. econstructor; unfold var_family, lookup.
   destruct (eq_dec x x); [|contradiction].
   - destruct (Δ x); sauto.
   - unfold exh, upd; intro y. sauto use: (eq_dec x y).
@@ -184,7 +184,7 @@ Proof.
       destruct (eq_dec fn x); [|apply (proj2 (Hσ x))]; sauto. }
     rewrite <- Hl_fn_eq; assumption.
 
-  - asimpl; constructor; eapply IHHtyp.
+  - constructor; eapply IHHtyp.
     + apply (join_family_scons_head_one _ _ _ Jfam).
     + intro x; destruct x as [x'|].
       * split; intro Heq.
@@ -196,8 +196,7 @@ Proof.
         assert (Hexh' : exh hal ((T2, zero) .: Δupd)) by (sauto use: exh_cons, halz).
         now rewrite <- (upd_none _ (T2, one) _) in Hexh'.
 
-  - asimpl.
-    destruct (join_family_split σ Jfam H Hσ)
+  - destruct (join_family_split σ Jfam H Hσ)
       as (? & ? & ? & ? & Jt & Jfam1 & Jfam2 & _ & Hσ1 & Hσ2).
     specialize (IHHtyp1 _ _ σ _ Jfam1 Hσ1).
     specialize (IHHtyp2 _ _ σ _ Jfam2 Hσ2).

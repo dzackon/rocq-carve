@@ -162,7 +162,7 @@ Proof.
   induction HT; intros * HG.
 
   - (* t_Var *)
-    sauto lq:on use: val_inclusion, lookup_G. 
+    sauto lq:on use: val_inclusion, lookup_G.
 
   - (* t_Abs *)
     apply val_inclusion. asimpl.

@@ -105,3 +105,6 @@ Instance mult_Sep_alg : Sep_alg mult :=
     core_unit := mcore_unit;
     join_core_sub := join_mcore_sub;
     core_idem := mcore_idem }.
+
+Instance mult_Flat_alg : Flat_alg mult.
+Proof. constructor; intros; destruct H; constructor. Qed.
