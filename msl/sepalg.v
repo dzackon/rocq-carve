@@ -23,7 +23,7 @@ Class Perm_alg (t: Type) {J: Join t} : Type :=
 Arguments Perm_alg _ {J}.
 
 Definition unit_for {t} {J: Join t} (e a: t) := join e a a.
-Definition identity {t} {J: Join t} (e: t) := forall a b, join e a b -> a=b.
+Definition identity {t} {J: Join t} (e: t) := forall a b, join e a b -> a = b.
 
 #[export] Hint Extern 2 (@join _ _ _ _ _) =>
    (eapply join_comm; trivial;
@@ -40,12 +40,12 @@ Definition identity {t} {J: Join t} (e: t) := forall a b, join e a b -> a=b.
 Lemma join_assoc_uniq:
   forall {t} {J: Join t} (PA1 PA2: @Perm_alg t J),
       forall a b c d e H H',
-        (projT1 (@join_assoc _ _ PA1  a b c d e H H')) =
-        (projT1 (@join_assoc _ _ PA2  a b c d e H H')).
+        (projT1 (@join_assoc _ _ PA1 a b c d e H H')) =
+        (projT1 (@join_assoc _ _ PA2 a b c d e H H')).
 Proof.
   intros.
-  destruct (@join_assoc _ _ PA1  a b c d e H H') as [f [? ?]].
-  destruct (@join_assoc _ _ PA2  a b c d e H H') as [g [? ?]].
+  destruct (@join_assoc _ _ PA1 a b c d e H H') as [f [? ?]].
+  destruct (@join_assoc _ _ PA2 a b c d e H H') as [g [? ?]].
   simpl. apply (join_eq j j1).
 Qed.
 
@@ -87,19 +87,11 @@ Qed.
 
 Lemma core_self_join {A} {J: Join A} {SA: Sep_alg A}:
   forall a, a = core a -> join a a a.
-Proof.
-  intros.
-  generalize (core_unit a); rewrite <- H; intro. apply H0.
-Qed.
+Proof. intros. generalize (core_unit a); rewrite <- H; intro. apply H0. Qed.
 
 Lemma identity_self_join {A} {J: Join A} {PA: Perm_alg A} {SA: Sep_alg A}:
   forall a, identity a -> join a a a.
-Proof.
-  intros.
-  apply core_self_join.
-  symmetry; apply H.
-  apply join_comm, core_unit.
-Qed.
+Proof. intros. apply core_self_join. symmetry; apply H, join_comm, core_unit. Qed.
 
 Class Flat_alg A {J: Join A} {SA: Sep_alg A} : Type :=
    { join_core: forall {a b c}, join a b c -> core a = core c }.
@@ -123,8 +115,7 @@ Proof. intros. eapply join_self; eauto. Qed.
 Lemma unit_identity {A} {J: Join A} {PA: Perm_alg A} {SA: Sep_alg A} {DA: Disj_alg A} :
   forall {e} b, unit_for e b -> identity e.
 Proof.
- intros.
- destruct (join_assoc (join_comm H) (join_comm H)) as [? []].
+ intros. destruct (join_assoc (join_comm H) (join_comm H)) as [? []].
  eapply join_self; eauto.
 Qed.
 
@@ -148,31 +139,27 @@ Qed.
 
 Lemma core_identity' {A} {J: Join A} {PA: Perm_alg A} {SA: Sep_alg A} {DA: Disj_alg A}:
   forall a, identity (core a).
-Proof.
-  repeat intro.
-  eapply join_self; eauto.
-  apply core_duplicable.
-Qed.
+Proof. repeat intro. eapply join_self; eauto. apply core_duplicable. Qed.
 
 #[export] Instance disj_flat {A} `{PA: Perm_alg A} {SA: Sep_alg A} {DA: Disj_alg A} : Flat_alg A.
 Proof.
- constructor.
- intros.
- destruct (join_core_sub H) as [? Hj].
- pose proof (core_duplicable c) as Hc.
- destruct (join_assoc (join_comm Hj) Hc) as (? & Hcore & _).
- pose proof (core_identity' c _ _ (join_comm Hcore)) as Heq; subst.
- symmetry; eapply core_identity'; eauto.
+  constructor.
+  intros.
+  destruct (join_core_sub H) as [? Hj].
+  pose proof (core_duplicable c) as Hc.
+  destruct (join_assoc (join_comm Hj) Hc) as (? & Hcore & _).
+  pose proof (core_identity' c _ _ (join_comm Hcore)) as Heq; subst.
+  symmetry; eapply core_identity'; eauto.
 Qed.
 
 Lemma core_hom {A} {J: Join A} {PA: Perm_alg A} {SA: Sep_alg A} {FA: Flat_alg A}:
   forall {a b c}, join a b c -> join (core a) (core b) (core c).
 Proof.
- intros.
- generalize (join_core H); intro.
+  intros.
+  generalize (join_core H); intro.
   generalize (join_core (join_comm H)); intro.
- rewrite H0; rewrite H1.
- apply core_duplicable.
+  rewrite H0; rewrite H1.
+  apply core_duplicable.
 Qed.
 
 Lemma split_core' {A} {J: Join A} {PA: Perm_alg A} {SA: Sep_alg A} {FA: Flat_alg A}:
@@ -224,11 +211,7 @@ Proof. intros. exists (core a). split. apply core_identity. apply core_unit. Qed
 
 Lemma identity_core {A} {J: Join A} {PA: Perm_alg A} {SA: Sep_alg A}:
   forall a, identity a -> a = core a.
-Proof.
-  intros.
-  symmetry; apply H.
-  apply join_comm, core_unit.
-Qed.
+Proof. intros. symmetry; apply H. apply join_comm, core_unit. Qed.
 
 (* Sing_alg: adds the property that makes the Permission Algebra
   into a single-unit Separation Algebra.  (this is the "traditional"
@@ -325,7 +308,7 @@ Proof. intros. split; intro; destruct H; exists x; apply join_comm; trivial. Qed
 Lemma joins_sym': forall {A} `{Perm_alg A} {phi1 phi2}, joins phi1 phi2 -> joins phi2 phi1.
 Proof. intros. apply joins_sym. auto. Qed.
 
-Lemma join_join_sub {A} `{Perm_alg A}: forall {a b c},
+Lemma join_join_sub {A} `{Join A}: forall {a b c},
     join a b c -> join_sub a c.
 Proof. intros; econstructor; eauto. Qed.
 
@@ -392,9 +375,7 @@ Qed.
 Lemma join_sub_joins_trans {A} `{HA: Perm_alg A}: forall {a b c},
     join_sub a c -> joins c b -> joins a b.
 Proof.
-  intros.
-  destruct H as [wx ?].
-  destruct H0 as [wy ?].
+  intros. destruct H as [wx ?], H0 as [wy ?].
   destruct (join_assoc (join_comm H) H0) as [wf [? ?]].
   econstructor; eauto.
 Qed.
@@ -403,8 +384,7 @@ Lemma join_sub_joins' {A} `{HA: Perm_alg A}:
   forall {a a' b b' : A},
     join_sub a a' -> join_sub b b' -> joins a' b' -> joins a b.
 Proof.
-  intros.
-  destruct H; destruct H0; destruct H1.
+  intros. destruct H, H0, H1.
   destruct (join_assoc (join_comm H) H1) as [f [? ?]].
   destruct (join_assoc (join_comm H0) (join_comm H2)) as [g [? ?]].
   exists g; apply join_comm; auto.
@@ -581,10 +561,7 @@ Qed.
   (** Identities are exactly units for themselves (are idempotent).*)
 Lemma identity_unit_equiv {A} {JA: Join A} {PA: Perm_alg A} {SA: Sep_alg A} {CA: Disj_alg A}:
   forall a, identity a <-> unit_for a a.
-Proof.
-  intros.
-  split; [apply identity_unit' | apply unit_identity].
-Qed.
+Proof. intros. split; [apply identity_unit' | apply unit_identity]. Qed.
 
   (** Joinable identities are unique. *)
 Lemma identities_unique {A} `{HA: Perm_alg A} :
@@ -762,9 +739,7 @@ Definition nonunit {A} `{Join A}  (a: A) := forall x, ~ unit_for a x.
 
 Lemma nonidentity_nonunit {A} {JA: Join A} {PA: Perm_alg A} {SA: Sep_alg A} {CA: Disj_alg A}:
   forall {a}, nonidentity a -> nonunit a.
-Proof.
- intros. intros ? H0; apply H. eapply unit_identity; apply H0.
-Qed.
+Proof. intros. intros ? H0; apply H. eapply unit_identity; apply H0. Qed.
 
 Lemma nonunit_nonidentity {A} {JA: Join A} {PA: Perm_alg A} {SA: Sep_alg A}:
   forall x, nonunit x -> ~identity x.

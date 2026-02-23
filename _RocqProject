@@ -2,14 +2,15 @@
 # Makefile for rocq-carve
 # ========================================================
 
+-Q autosubst Autosubst
 -Q msl VST.msl
 -Q src CARVe
--Q autosubst Autosubst
--Q case_studies/illc ""
--Q case_studies/llc ""
+-Q case_studies/gslc ""
+-R case_studies/cp CP
+-Q case_studies/adjoint ""
 -docroot CARVe
 
 msl
-src
 autosubst
+src
 case_studies

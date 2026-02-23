@@ -1,9 +1,10 @@
+
 (** This file collects some axioms used throughout the Mechanized Semantic Library development.
   This file was developed in 2010 by Andrew W. Appel and Xavier Leroy, and harmonizes
   the axioms used by MSL and by the CompCert project.
  *)
 
-Require Coq.Logic.ClassicalFacts.
+From Stdlib Require Import Logic.ClassicalFacts.
 
 (** * Extensionality axioms *)
 
@@ -19,8 +20,7 @@ Lemma functional_extensionality {A B} (f g : A -> B) :
   (forall x, f x = g x) -> f = g.
 >>
 *)
-
-Require Export Coq.Logic.FunctionalExtensionality.
+From Stdlib Require Export Logic.FunctionalExtensionality.
 
 (** For compatibility with earlier developments, [extensionality]
   is an alias for [functional_extensionality]. *)
@@ -42,7 +42,5 @@ Arguments prop_ext [A B] _.
     extensionality. *)
 
 Lemma proof_irr: ClassicalFacts.proof_irrelevance.
-Proof.
-  exact (ClassicalFacts.ext_prop_dep_proof_irrel_cic prop_ext).
-Qed.
+Proof. exact (ClassicalFacts.ext_prop_dep_proof_irrel_cic prop_ext). Qed.
 Arguments proof_irr [A] _ _.

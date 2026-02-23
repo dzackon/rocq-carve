@@ -12,6 +12,7 @@
 Require Import VST.msl.base.
 Require Import VST.msl.sepalg.
 Unset Automatic Proposition Inductives.
+
 (** The trivial separation algebra over the unit type.  This SA
     is the identity of the product SA operator, up to isomorphism.
 *)
@@ -20,18 +21,16 @@ Unset Automatic Proposition Inductives.
 
   #[global] Instance Perm_unit : Perm_alg unit.
   Proof.
-  constructor; auto with typeclass_instances; try firstorder.
-  destruct z; destruct z'; auto.
-  destruct a; destruct b; auto.
+    constructor; auto with typeclass_instances; try firstorder.
+    destruct z; destruct z'; auto.
+    destruct a; destruct b; auto.
   Qed.
 
   #[global] Instance Sep_unit: FSep_alg unit.
   Proof. apply mkSep with (fun _ => tt); intros;  hnf; auto with typeclass_instances. Defined.
 
   #[global] Instance Sing_unit: Sing_alg unit.
-  Proof. apply (mkSing tt); intros; hnf; simpl.
-        destruct (fcore a); auto.
- Qed.
+  Proof. apply (mkSing tt); intros; hnf; simpl. destruct (fcore a); auto. Qed.
 
   #[global] Instance Canc_unit: Canc_alg unit.
   Proof. repeat intro. auto. hnf; destruct a1; destruct a2; auto. Qed.
@@ -53,8 +52,9 @@ Unset Automatic Proposition Inductives.
   #[global] Instance Perm_void : Perm_alg Void.
   Proof. constructor; intuition.  Qed.
   #[global] Instance Sep_void: FSep_alg Void.
-  Proof. apply mkSep with (fun x => x); intros.
-      auto with typeclass_instances. destruct t. destruct a.
+  Proof.
+    apply mkSep with (fun x => x); intros.
+    auto with typeclass_instances. destruct t. destruct a.
   Defined.
   #[global] Instance Canc_void: Canc_alg Void.
   Proof. repeat intro. destruct b. Qed.
@@ -63,7 +63,7 @@ Unset Automatic Proposition Inductives.
   #[global] Instance Cross_void: Cross_alg Void.
   Proof. repeat intro. destruct z. Qed.
 
-(** The separation algebra over booleans, e.g. Z/2 with bounded addition *)
+  (** The separation algebra over booleans, e.g. Z/2 with bounded addition *)
 
   Inductive join_bool : bool -> bool -> bool -> Prop :=
   | jb_fff: join_bool false false false
@@ -91,8 +91,7 @@ Unset Automatic Proposition Inductives.
   Defined.
 
   #[global] Instance Sing_bool: Sing_alg bool.
-  Proof. apply (mkSing false). intros; simpl; reflexivity.
-  Defined.
+  Proof. apply (mkSing false). intros; simpl; reflexivity. Defined.
 
   #[global] Instance Canc_bool: Canc_alg bool.
   Proof. repeat intro. inv H; inv H0; hnf; auto. Qed.
@@ -102,13 +101,13 @@ Unset Automatic Proposition Inductives.
 
   #[global] Instance Cross_bool: Cross_alg bool.
   Proof. repeat intro.
-     icase a; icase b; try solve [exfalso; (try inv H; inv H0)];
+    icase a; icase b; try solve [exfalso; (try inv H; inv H0)];
     icase z; icase c; icase d; try solve [exfalso; (try inv H; inv H0)].
-     exists (true,false,false,false); repeat split; constructor.
-     exists (false,true,false,false); repeat split; constructor.
-     exists (false,false,true,false); repeat split; constructor.
-     exists (false,false,false,true); repeat split; constructor.
-     exists (false,false,false,false); repeat split; constructor.
+    exists (true,false,false,false); repeat split; constructor.
+    exists (false,true,false,false); repeat split; constructor.
+    exists (false,false,true,false); repeat split; constructor.
+    exists (false,false,false,true); repeat split; constructor.
+    exists (false,false,false,false); repeat split; constructor.
   Qed.
 
 Section JOIN_EQUIV.
@@ -129,10 +128,11 @@ Section JOIN_EQUIV.
   Qed.
 
   #[local] Instance Sep_equiv (A: Type): FSep_alg A.
-  Proof. apply mkSep with (fun a => a); intros.
-            apply Perm_equiv.
-            split; reflexivity.
-            destruct H; subst; reflexivity.
+  Proof.
+    apply mkSep with (fun a => a); intros.
+    apply Perm_equiv.
+    split; reflexivity.
+    destruct H; subst; reflexivity.
   Defined.
 
   #[local] Instance Canc_equiv (A: Type): Canc_alg A.
@@ -142,16 +142,18 @@ Section JOIN_EQUIV.
   Proof. repeat intro. inv H0; auto. Qed.
 
   #[local] Instance Cross_equiv (A: Type): Cross_alg A.
-  Proof. repeat intro. destruct H; destruct H0; subst.
-   exists (z,z,z,z); repeat split; reflexivity.
+  Proof.
+    repeat intro. destruct H; destruct H0; subst.
+    exists (z,z,z,z); repeat split; reflexivity.
   Qed.
 
-Lemma join_equiv_refl: forall A (v: A), @join A (Join_equiv A) v v v.
-Proof. split; auto. Qed.
+  Lemma join_equiv_refl: forall A (v: A), @join A (Join_equiv A) v v v.
+  Proof. split; auto. Qed.
+
 End JOIN_EQUIV.
 
-(* WARNING: DO NOT DO    [Existing Instance Join_equiv]   BECAUSE
-   IT WILL MATCH IN UNINTENDED PLACES.  But I think it will do no harm
+(* WARNING: DO NOT DO [Existing Instance Join_equiv] BECAUSE
+   IT WILL MATCH IN UNINTENDED PLACES. But I think it will do no harm
   to do the following Existing Instances: *)
 #[global] Existing Instance Perm_equiv.
 #[global] Existing Instance Sep_equiv.
@@ -176,46 +178,49 @@ Section SepAlgProp.
 
   #[global] Instance Perm_prop : Perm_alg (sig P).
   Proof.
-   constructor; intros.
+    constructor; intros.
     destruct z; destruct z'. apply exist_ext. do 2 red in H,H0; eapply join_eq; eauto.
     do 2 red in H,H0.
     destruct (join_assoc H H0) as [f [? ?]].
-     assert (P f) by (apply (HPjoin _ _ _ H1); auto; apply proj2_sig; auto).
-     exists (exist P f H3).
-     split; auto.
-     do 2 red in H; apply join_comm in H; auto.
-     do 2 red in H,H0. simpl in H,H0.
-     destruct a, b; simpl; apply exist_ext; eapply join_positivity; eauto.
+    assert (P f) by (apply (HPjoin _ _ _ H1); auto; apply proj2_sig; auto).
+    exists (exist P f H3).
+    split; auto.
+    do 2 red in H; apply join_comm in H; auto.
+    do 2 red in H,H0. simpl in H,H0.
+    destruct a, b; simpl; apply exist_ext; eapply join_positivity; eauto.
  Qed.
 
-  #[global] Instance Sep_prop (SA: Sep_alg A)(HPcore : forall x, P x -> P (core x)): Sep_alg (sig P).
-  Proof. repeat intro.
-     exists (fun a : sig P => exist P (core (proj1_sig a)) (HPcore _ (proj2_sig a)));
-      intros. apply Perm_prop.
-      do 2 red. destruct t; simpl. apply join_comm; apply core_unit.
-      exists (exist _ (core (proj1_sig c)) (HPcore _ (proj2_sig c))).
-      hnf; simpl. eapply core_sub_join, join_core_sub, H.
-      apply exist_ext. simpl. apply core_idem.
+  #[global] Instance Sep_prop (SA: Sep_alg A) (HPcore : forall x, P x -> P (core x)): Sep_alg (sig P).
+  Proof.
+    repeat intro.
+    exists (fun a : sig P => exist P (core (proj1_sig a)) (HPcore _ (proj2_sig a)));
+    intros. apply Perm_prop.
+    do 2 red. destruct t; simpl. apply join_comm; apply core_unit.
+    exists (exist _ (core (proj1_sig c)) (HPcore _ (proj2_sig c))).
+    hnf; simpl. eapply core_sub_join, join_core_sub, H.
+    apply exist_ext. simpl. apply core_idem.
   Defined.
 
- #[global] Instance Sing_prop  (SA: Sep_alg A)(Sing_A: Sing_alg A)
+ #[global] Instance Sing_prop (SA: Sep_alg A) (Sing_A: Sing_alg A)
                (HPcore : forall x, P x -> P (core x)): P the_unit ->
     @Sing_alg (sig P) Join_prop (Sep_prop _ HPcore).
- Proof. intros.
-  apply (mkSing (exist P the_unit H)).
-  intros. destruct a as  [a Ha]. simpl. apply exist_ext.
-  rewrite <- (the_unit_core a). reflexivity.
- Defined.
-
-  #[global] Instance Canc_prop  {CA: Canc_alg A}:  Canc_alg (sig P).
   Proof.
-   intros [a Ha] [b Hb] [c1 Hc1] [c2 Hc2].
+    intros.
+    apply (mkSing (exist P the_unit H)).
+    intros. destruct a as  [a Ha]. simpl. apply exist_ext.
+    rewrite <- (the_unit_core a). reflexivity.
+  Defined.
+
+  #[global] Instance Canc_prop {CA: Canc_alg A}: Canc_alg (sig P).
+  Proof.
+    intros [a Ha] [b Hb] [c1 Hc1] [c2 Hc2].
     unfold join, Join_prop; simpl; intros. apply exist_ext.
-  eapply join_canc; eauto.
+    eapply join_canc; eauto.
   Qed.
 
   #[global] Instance Disj_prop {DA: Disj_alg A}: Disj_alg (sig P).
-  Proof. intros [a Ha][b Hb].
+  Proof.
+    intros [a Ha][b Hb].
     unfold join, Join_prop; simpl; intros.
     intros [] [] Hj.
     eapply exist_ext, join_self; eauto.
@@ -228,6 +233,7 @@ Section SepAlgProp.
 *)
 
 End SepAlgProp.
+
 #[global] Existing Instance Join_prop.
 #[global] Existing Instance Perm_prop.
 #[global] Existing Instance Sep_prop.
@@ -249,36 +255,37 @@ Section SepAlgFun.
 
   #[global] Instance Perm_fun : Perm_alg (key -> t').
   Proof.
-   constructor; intros.
-   extensionality k.
-   apply (join_eq (H k) (H0 k)).
-  exists (fun x => projT1 (join_assoc (H x) (H0 x))).
-  split; intro k; destruct (join_assoc (H k) (H0 k)) as [f [? ?]]; auto.
-  intro k; apply join_comm; apply H.
-  extensionality k; specialize (H k); specialize (H0 k).
-  apply (join_positivity H H0).
- Qed.
+    constructor; intros.
+    extensionality k.
+    apply (join_eq (H k) (H0 k)).
+    exists (fun x => projT1 (join_assoc (H x) (H0 x))).
+    split; intro k; destruct (join_assoc (H k) (H0 k)) as [f [? ?]]; auto.
+    intro k; apply join_comm; apply H.
+    extensionality k; specialize (H k); specialize (H0 k).
+    apply (join_positivity H H0).
+  Qed.
 
   #[global] Instance Sep_fun (SA: Sep_alg t'): Sep_alg (key -> t').
   Proof. exists (fun a k => core (a k)); intros.
-   intro k; apply core_unit.
-   eexists; intro. eapply core_sub_join, join_core_sub, H.
-   extensionality k; apply core_idem.
- Defined.
+    intro k; apply core_unit.
+    eexists; intro. eapply core_sub_join, join_core_sub, H.
+    extensionality k; apply core_idem.
+  Defined.
 
- #[global] Instance Sing_fun (SA: Sep_alg t'): Sing_alg t' -> Sing_alg (key -> t').
- Proof.
- intros. apply (mkSing (fun _: key => the_unit)).
- intro a; extensionality k.
- rewrite <- (the_unit_core (a k)).
-  unfold core. simpl. auto.
- Defined.
+  #[global] Instance Sing_fun (SA: Sep_alg t'): Sing_alg t' -> Sing_alg (key -> t').
+  Proof.
+    intros. apply (mkSing (fun _: key => the_unit)).
+    intro a; extensionality k.
+    rewrite <- (the_unit_core (a k)).
+    unfold core. simpl. auto.
+  Defined.
 
- #[global] Instance Canc_fun: Canc_alg t' -> Canc_alg (key -> t').
- Proof. repeat intro. extensionality x; apply (join_canc (H0 x) (H1 x)). Qed.
+  #[global] Instance Canc_fun: Canc_alg t' -> Canc_alg (key -> t').
+  Proof. repeat intro. extensionality x; apply (join_canc (H0 x) (H1 x)). Qed.
 
- #[global] Instance Disj_fun: Disj_alg t' -> Disj_alg (key -> t').
- Proof.  repeat intro. extensionality x. eapply join_self; eauto. Qed.
+  #[global] Instance Disj_fun: Disj_alg t' -> Disj_alg (key -> t').
+  Proof. repeat intro. extensionality x. eapply join_self; eauto. Qed.
+
 End SepAlgFun.
 
 #[global] Existing Instance Join_fun.
@@ -308,22 +315,22 @@ Section SepAlgPi.
 
   #[global] Instance Perm_pi  : Perm_alg P.
   Proof.
-   constructor; intros.
-   extensionality i. apply (join_eq (H i) (H0 i)).
-   exists (fun i => projT1 (join_assoc (H i) (H0 i))).
-   split; intro i; destruct (join_assoc (H i) (H0 i)) as [f [? ?]]; auto.
-   intro i; apply join_comm; auto.
-   extensionality i. specialize (H i); specialize (H0 i).
-   apply (join_positivity H H0).
+    constructor; intros.
+    extensionality i. apply (join_eq (H i) (H0 i)).
+    exists (fun i => projT1 (join_assoc (H i) (H0 i))).
+    split; intro i; destruct (join_assoc (H i) (H0 i)) as [f [? ?]]; auto.
+    intro i; apply join_comm; auto.
+    extensionality i. specialize (H i); specialize (H0 i).
+    apply (join_positivity H H0).
  Qed.
 
   #[global] Instance Sep_pi (SA : forall i:I, Sep_alg (Pi i)): Sep_alg P.
   Proof. exists (fun a i => core (a i)); intros.
-   intro i; apply core_unit.
-   exists (fun i => core (c i)); intro.
-   eapply core_sub_join, join_core_sub, H.
-   extensionality i; apply core_idem.
- Defined.
+    intro i; apply core_unit.
+    exists (fun i => core (c i)); intro.
+    eapply core_sub_join, join_core_sub, H.
+    extensionality i; apply core_idem.
+  Defined.
 
   #[global] Instance Canc_pi: (forall i, Canc_alg (Pi i)) -> Canc_alg P.
   Proof. repeat intro. extensionality i; apply (join_canc (H0 i) (H1 i)). Qed.
@@ -332,6 +339,7 @@ Section SepAlgPi.
   Proof. repeat intro. extensionality i; apply (join_self (H0 i)); auto. Qed.
 
 End SepAlgPi.
+
 #[global] Existing Instance Join_pi.
 #[global] Existing Instance Perm_pi.
 #[global] Existing Instance Sep_pi.
@@ -370,23 +378,24 @@ Section SepAlgSigma.
   #[global] Instance Join_sigma: Join S := join_sigma.
 
   #[global] Instance Perm_sigma: Perm_alg S.
-  Proof.  constructor; intros.
+  Proof.
+    constructor; intros.
 
     (* join_eq *)
     destruct z as [z Hz]. destruct z' as [z' Hz'].
     destruct x as [x Hx]; destruct y as [y Hy].
     assert (z=z').
     inv H. subst.
-    apply inj_pair2 in H3; subst.  apply inj_pair2 in H5; subst.
+    apply inj_pair2 in H3; subst. apply inj_pair2 in H5; subst.
     apply inj_pair2 in H7; subst.
     inv H0; subst; auto. subst z'.
     f_equal.
     inv H; subst.
-   apply inj_pair2 in H3; subst.
-    apply inj_pair2 in H5; subst.  apply inj_pair2 in H7;  subst.
+    apply inj_pair2 in H3; subst.
+    apply inj_pair2 in H5; subst. apply inj_pair2 in H7;  subst.
     inv H0; subst.
-   apply inj_pair2 in H3; subst.
-    apply inj_pair2 in H4; subst.  apply inj_pair2 in H5;  subst.
+    apply inj_pair2 in H3; subst.
+    apply inj_pair2 in H4; subst. apply inj_pair2 in H5;  subst.
     eapply join_eq; eauto.
 
     (* join_assoc *)
@@ -415,39 +424,39 @@ Section SepAlgSigma.
     inv H; inv H0.  apply inj_pair2 in H3.  apply inj_pair2 in H5.  subst.
     f_equal.
     eapply join_positivity; eauto.
- Qed.
-
-
+  Qed.
 
   #[global] Instance Sep_sigma (SA : forall i:I, Sep_alg (Sigma i)) : Sep_alg S.
-  Proof. exists
-      (fun (a : S) => existT Sigma (projT1 a) (core (projT2 a))).
-   intros [i a]. constructor. apply core_unit.
-   intros. inv H. eexists; constructor. eapply core_sub_join, join_core_sub, H0.
-   intros. simpl. rewrite core_idem; reflexivity.
+  Proof.
+    exists (fun (a : S) => existT Sigma (projT1 a) (core (projT2 a))).
+    intros [i a]. constructor. apply core_unit.
+    intros. inv H. eexists; constructor. eapply core_sub_join, join_core_sub, H0.
+    intros. simpl. rewrite core_idem; reflexivity.
   Defined.
 
   #[global] Instance Canc_sigma: (forall i, Canc_alg (Sigma i)) -> Canc_alg S.
-  Proof. repeat intro.
-       destruct a1; destruct a2; destruct b; destruct c;
-       inv H0; inv H1; subst.
-       repeat match goal with H: existT _ _ _ = existT _ _ _ |- _ => apply inj_pair2 in H end.
-     subst.
-    f_equal. apply (join_canc H3 H2).
+  Proof.
+    repeat intro.
+    destruct a1; destruct a2; destruct b; destruct c;
+    inv H0; inv H1; subst.
+    repeat match goal with H: existT _ _ _ = existT _ _ _ |- _ => apply inj_pair2 in H end.
+    subst. f_equal. apply (join_canc H3 H2).
   Qed.
 
   #[global] Instance Disj_sigma: (forall i, Disj_alg (Sigma i)) -> Disj_alg S.
-  Proof. repeat intro.
+  Proof.
+    repeat intro.
     destruct a as [ia a]; destruct b as [ib b].
-  (* Some weird bug in Coq requires this two-stage inversion process *)
+    (* Some weird bug in Coq requires this two-stage inversion process *)
     red in H0. generalize H0; intro. inv H2.
-     apply inj_pair2 in H8; apply inj_pair2 in H5; apply inj_pair2 in H6;
-     subst. inv H0.
-     apply inj_pair2 in H7; apply inj_pair2 in H5; apply inj_pair2 in H6;
-     subst.
+    apply inj_pair2 in H8; apply inj_pair2 in H5; apply inj_pair2 in H6;
+    subst. inv H0.
+    apply inj_pair2 in H7; apply inj_pair2 in H5; apply inj_pair2 in H6;
+    subst.
     inv H1. apply inj_pair2 in H5; subst.
     f_equal; eapply join_self; eauto.
- Qed.
+  Qed.
+
 End SepAlgSigma.
 
 #[global] Existing Instance Join_sigma.
@@ -643,18 +652,20 @@ Section sa_list.
 
   #[global] Instance Canc_list {CA: Canc_alg A}: Canc_alg (list A).
   Proof.
-   intro. induction a1; intros; inv H; inv H0; auto.
+    intro. induction a1; intros; inv H; inv H0; auto.
     f_equal.
-     eapply join_canc;eauto.
-   eapply IHa1; eauto.
+    eapply join_canc; eauto.
+    eapply IHa1; eauto.
   Qed.
 
   #[global] Instance Disj_list {DAa: Disj_alg A} : Disj_alg (list A).
-  Proof. intro. induction a; repeat intro; inv H; inv H0; auto.
+  Proof.
+    intro. induction a; repeat intro; inv H; inv H0; auto.
     f_equal; [eapply join_self; eauto | eapply IHa; eauto].
   Qed.
 
 End sa_list.
+
 #[global] Existing Instance Join_list.
 #[global] Existing Instance Perm_list.
 #[global] Existing Instance Sep_list.
@@ -696,12 +707,7 @@ Section sa_preimage.
   Hypothesis Hf_f' : join_hom (f oo f').
 
   Lemma f_inj : forall x y : A,  f x = f y -> x = y.
-  Proof.
-    intros.
-    rewrite <- (Hf'_f x).
-    rewrite <- (Hf'_f y).
-    rewrite H; auto.
-  Qed.
+  Proof. intros. rewrite <- (Hf'_f x). rewrite <- (Hf'_f y). rewrite H; auto. Qed.
 
   #[global] Instance Join_preimage: Join A :=
           fun a b c => join (f a) (f b) (f c).
@@ -709,9 +715,9 @@ Section sa_preimage.
   #[global] Instance Perm_preimage  : @Perm_alg _  Join_preimage.
   Proof.
     constructor; simpl; intros.
-   do 2 red in H,H0.
-   apply f_inj.
-   apply (join_eq H H0).
+    do 2 red in H,H0.
+    apply f_inj.
+    apply (join_eq H H0).
 
     do 2 red in H,H0.
     destruct (join_assoc H H0) as [z [? ?]].
@@ -724,7 +730,7 @@ Section sa_preimage.
     do 2 red in H|-*; auto.
 
     apply f_inj; eapply join_positivity; eauto.
- Qed.
+  Qed.
 
   Context {SAb: Sep_alg B}.
   Hypothesis Hcore : forall x, core (f (f' x)) = f (f' (core x)).
@@ -743,22 +749,21 @@ Section sa_preimage.
     rewrite Hcore, Hf'_f, core_idem. reflexivity.
   Defined.
 
- #[global] Instance Sing_preimage {Sing_b: Sing_alg B}: Sing_alg A.
- Proof.
- apply (mkSing (f' the_unit)).
- intro.
- simpl. rewrite <- (the_unit_core (f a)). reflexivity.
- Defined.
+  #[global] Instance Sing_preimage {Sing_b: Sing_alg B}: Sing_alg A.
+  Proof.
+    apply (mkSing (f' the_unit)).
+    intro. simpl. rewrite <- (the_unit_core (f a)). reflexivity.
+  Defined.
 
- #[global] Instance Canc_preimage {CAb: Canc_alg B} : Canc_alg A.
- Proof. intros ? ? ? ? ? ?. do 2 red in H,H0.
-  generalize (join_canc H H0); intro.
-  apply f_inj; auto.
- Qed.
+  #[global] Instance Canc_preimage {CAb: Canc_alg B} : Canc_alg A.
+  Proof.
+    intros ? ? ? ? ? ?. do 2 red in H,H0.
+    generalize (join_canc H H0); intro.
+    apply f_inj; auto.
+  Qed.
 
  #[global] Instance Disj_preimage {DAb: Disj_alg B} : Disj_alg A.
-  Proof. repeat intro. do 2 red in H. apply join_self in H. apply f_inj; auto.
-  Qed.
+  Proof. repeat intro. do 2 red in H. apply join_self in H. apply f_inj; auto. Qed.
 
 End sa_preimage.
 
@@ -792,34 +797,35 @@ Section SepAlgBijection.
 
     do 2 red in H,H0. rewrite <- (bij_fg _ _ bij a); rewrite <- (bij_fg _ _ bij b).
     f_equal. eapply join_positivity; eauto.
-   Qed.
+  Qed.
 
 
   #[global] Instance Sep_bij {SAa: Sep_alg A} : Sep_alg B.
   Proof.
-   exists (fun b => bij_f _ _ bij (core (bij_g _ _ bij b))); intros.
-   do 3 red.
-   repeat rewrite bij_gf. simpl. apply core_unit.
-   hnf in H. apply join_core_sub in H as [x ?].
-   exists (bij_f _ _ bij x); hnf. rewrite !bij_gf; auto.
-   rewrite bij_gf, core_idem; reflexivity.
- Defined.
+    exists (fun b => bij_f _ _ bij (core (bij_g _ _ bij b))); intros.
+    do 3 red.
+    repeat rewrite bij_gf. simpl. apply core_unit.
+    hnf in H. apply join_core_sub in H as [x ?].
+    exists (bij_f _ _ bij x); hnf. rewrite !bij_gf; auto.
+    rewrite bij_gf, core_idem; reflexivity.
+  Defined.
 
  Lemma Sing_bij {SAa: Sep_alg A}{SingA: Sing_alg A} : Sing_alg B.
   Proof.
-   apply (mkSing (bij_f _ _ bij the_unit)); intros.
-   simpl. f_equal. apply  (the_unit_core (bij_g _ _ bij a)).
+    apply (mkSing (bij_f _ _ bij the_unit)); intros.
+    simpl. f_equal. apply  (the_unit_core (bij_g _ _ bij a)).
   Defined.
 
  #[global] Instance Canc_bij {SAa: Canc_alg A} : Canc_alg B.
-  Proof. repeat intro.
-    do 2 red in H,H0.
+  Proof.
+    repeat intro. do 2 red in H,H0.
     generalize (join_canc H H0);intro.
     rewrite <- (bij_fg _ _ bij a1). rewrite <- (bij_fg _ _ bij a2). rewrite H1; auto.
   Qed.
 
   #[global] Instance  Disj_bij {DAa: Disj_alg A} : Disj_alg B.
-  Proof. repeat intro. do 2 red in H.
+  Proof.
+    repeat intro. do 2 red in H.
     apply join_self in H.
     specialize (H _ _ H0).
     eapply bij_g_inj; eauto.

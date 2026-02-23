@@ -5,10 +5,7 @@ Definition funcomp {X Y Z} (g : Y -> Z) (f : X -> Y)  :=
 
 Lemma funcomp_assoc {W X Y Z} (g: Y -> Z) (f: X -> Y) (h: W -> X) :
   funcomp g (funcomp f h) = (funcomp (funcomp g f) h).
-Proof.
-  reflexivity.
-Qed.
-
+Proof. reflexivity. Qed.
 
 (** ** Functor Instances
 
@@ -19,7 +16,7 @@ Two things are important:
  *)
 
 (** *** List Instance *)
-Require Import List.
+From Stdlib Require Import List.
 
 Notation "'list_map'" := map.
 
@@ -29,7 +26,7 @@ Definition list_ext {A B} {f g : A -> B} :
   cbn. f_equal. apply H. apply IHxs.
 Defined.
 
-Definition list_id {A} {f : A -> A} :
+Definition list_id {A} {f: A -> A} :
   (forall x, f x = x) -> forall xs, list_map f xs = xs.
 Proof.
   intros H. induction xs. reflexivity.
@@ -129,13 +126,11 @@ Ltac check_no_evars :=
   | [|- ?x] => assert_fails (has_evar x)
   end.
 
-Require Import Setoid Morphisms.
+From Stdlib Require Import Setoid Morphisms.
 
-Lemma pointwise_forall {X Y:Type} (f g: X -> Y) :
+Lemma pointwise_forall {X Y: Type} (f g: X -> Y) :
   (pointwise_relation _ eq f g) -> forall x, f x = g x.
-Proof.
-  trivial.
-Qed.
+Proof. trivial. Qed.
 
 #[export] Instance funcomp_morphism {X Y Z} :
   Proper (@pointwise_relation Y Z eq ==> @pointwise_relation X Y eq ==> @pointwise_relation X Z eq) funcomp.

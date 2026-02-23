@@ -1,6 +1,6 @@
 (** ** Reduction and Values *)
 
-Require Export Coq.Program.Equality.
+From Stdlib Require Export Program.Equality.
 From Autosubst Require Import ARS core fintype stlc.
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -98,6 +98,4 @@ Definition value {m} (e : tm m) : Prop :=
 
 Lemma value_anti {m n} (xi : fin m -> fin n) (s : tm m) :
   value (s⟨xi⟩) -> value s.
-Proof.
-  destruct s; eauto.
-Qed.
+Proof. destruct s; eauto. Qed.

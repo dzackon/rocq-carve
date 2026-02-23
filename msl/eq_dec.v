@@ -33,9 +33,7 @@ Arguments upd_eq [A H B] _ _ _.
 Lemma upd_eq' {A} `{EqDec A} : forall B (f : A -> B) a b a',
   a = a' ->
   upd f a b a' = b.
-Proof.
-  intros. subst a'. apply upd_eq.
-Qed.
+Proof. intros. subst a'. apply upd_eq. Qed.
 Arguments upd_eq' [A H B] _ _ _ _ _.
 
 Lemma upd_neq {A} `{EqDec A} : forall B (f : A -> B) a b a',
@@ -59,21 +57,13 @@ Proof.
 Defined.
 
 #[global] Instance EqDec_prod (A: Type) (EA: EqDec A) (B: Type) (EB: EqDec B) : EqDec (A*B).
-Proof.
- hnf. decide equality; try apply eq_dec.
-Defined.
+Proof. hnf. decide equality; try apply eq_dec. Defined.
 
 #[global] Instance EqDec_list (A: Type) (EA: EqDec A) : EqDec (list A).
-Proof.
- hnf. apply list_eq_dec; intros; apply EA.
-Defined.
+Proof. hnf. apply list_eq_dec; intros; apply EA. Defined.
 
 #[global] Instance EqDec_option (A: Type) (EA: EqDec A) : EqDec (option A).
-Proof.
-  hnf; decide equality.
-Defined.
+Proof. hnf; decide equality. Defined.
 
 Lemma eq_dec_refl : forall {A B} {A_eq : EqDec A} (a : A) (b c : B), (if eq_dec a a then b else c) = b.
-Proof.
-  intros; destruct (eq_dec a a); [|contradiction n]; auto.
-Qed.
+Proof. intros; destruct (eq_dec a a); [|contradiction n]; auto. Qed.

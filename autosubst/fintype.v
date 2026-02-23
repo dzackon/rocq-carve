@@ -4,7 +4,7 @@
 Version: December 11, 2019.
 *)
 From Autosubst Require Import core.
-Require Import Setoid Morphisms Relation_Definitions.
+From Stdlib Require Import Setoid Morphisms Relation_Definitions.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -26,7 +26,7 @@ Fixpoint fin (n : nat) : Type :=
   end.
 
 (** Renamings and Injective Renamings
-     _Renamings_ are mappings between finite types.
+  _Renamings_ are mappings between finite types.
 *)
 Definition ren (m n : nat) : Type := fin m -> fin n.
 
@@ -58,7 +58,7 @@ Hint Opaque scons : rewrite.
 
 (** *** Type classes for renamings. *)
 
-Class Ren1 (X1  : Type) (Y Z : Type) :=
+Class Ren1 (X1 : Type) (Y Z : Type) :=
   ren1 : X1 -> Y -> Z.
 
 Class Ren2 (X1 X2 : Type) (Y Z : Type) :=
@@ -74,15 +74,15 @@ Class Ren5 (X1 X2 X3 X4 X5 : Type) (Y Z : Type) :=
   ren5 : X1 -> X2 -> X3 -> X4 -> X5 -> Y -> Z.
 
 Module RenNotations.
-  Notation "s ⟨ xi1 ⟩" := (ren1  xi1 s) (at level 7, left associativity, format "s  ⟨ xi1 ⟩") : subst_scope.
+  Notation "s ⟨ xi1 ⟩" := (ren1 xi1 s) (at level 7, left associativity, format "s ⟨ xi1 ⟩") : subst_scope.
 
-  Notation "s ⟨ xi1 ; xi2 ⟩" := (ren2 xi1 xi2 s) (at level 7, left associativity, format "s  ⟨ xi1 ; xi2 ⟩") : subst_scope.
+  Notation "s ⟨ xi1 ; xi2 ⟩" := (ren2 xi1 xi2 s) (at level 7, left associativity, format "s ⟨ xi1 ; xi2 ⟩") : subst_scope.
 
-  Notation "s ⟨ xi1 ; xi2 ; xi3 ⟩" := (ren3 xi1 xi2 xi3 s) (at level 7, left associativity, format "s  ⟨ xi1 ; xi2 ; xi3 ⟩") : subst_scope.
+  Notation "s ⟨ xi1 ; xi2 ; xi3 ⟩" := (ren3 xi1 xi2 xi3 s) (at level 7, left associativity, format "s ⟨ xi1 ; xi2 ; xi3 ⟩") : subst_scope.
 
-  Notation "s ⟨ xi1 ; xi2 ; xi3 ; xi4 ⟩" := (ren4  xi1 xi2 xi3 xi4 s) (at level 7, left associativity, format "s  ⟨ xi1 ; xi2 ; xi3 ; xi4 ⟩") : subst_scope.
+  Notation "s ⟨ xi1 ; xi2 ; xi3 ; xi4 ⟩" := (ren4 xi1 xi2 xi3 xi4 s) (at level 7, left associativity, format "s ⟨ xi1 ; xi2 ; xi3 ; xi4 ⟩") : subst_scope.
 
-  Notation "s ⟨ xi1 ; xi2 ; xi3 ; xi4 ; xi5 ⟩" := (ren5  xi1 xi2 xi3 xi4 xi5 s) (at level 7, left associativity, format "s  ⟨ xi1 ; xi2 ; xi3 ; xi4 ; xi5 ⟩") : subst_scope.
+  Notation "s ⟨ xi1 ; xi2 ; xi3 ; xi4 ; xi5 ⟩" := (ren5 xi1 xi2 xi3 xi4 xi5 s) (at level 7, left associativity, format "s ⟨ xi1 ; xi2 ; xi3 ; xi4 ; xi5 ⟩") : subst_scope.
 
   Notation "⟨ xi ⟩" := (ren1 xi) (at level 1, left associativity, format "⟨ xi ⟩") : fscope.
 
@@ -95,21 +95,21 @@ Class Subst1 (X1 : Type) (Y Z: Type) :=
   subst1 : X1 -> Y -> Z.
 
 Class Subst2 (X1 X2 : Type) (Y Z: Type) :=
-  subst2 : X1 -> X2 -> Y  -> Z.
+  subst2 : X1 -> X2 -> Y -> Z.
 
 Class Subst3 (X1 X2 X3 : Type) (Y Z: Type) :=
-  subst3 : X1 -> X2 -> X3 ->  Y  -> Z.
+  subst3 : X1 -> X2 -> X3 ->  Y -> Z.
 
 Class Subst4 (X1 X2 X3 X4: Type) (Y Z: Type) :=
-  subst4 : X1 -> X2 -> X3 -> X4 -> Y  -> Z.
+  subst4 : X1 -> X2 -> X3 -> X4 -> Y -> Z.
 
 Class Subst5 (X1 X2 X3 X4 X5 : Type) (Y Z: Type) :=
-  subst5 : X1 -> X2 -> X3 -> X4 -> X5  -> Y  -> Z.
+  subst5 : X1 -> X2 -> X3 -> X4 -> X5 -> Y -> Z.
 
 Module SubstNotations.
   Notation "s [ sigma ]" := (subst1 sigma s) (at level 7, left associativity, format "s '/' [ sigma ]") : subst_scope.
 
-  Notation "s [ sigma ; tau ]" := (subst2 sigma tau s) (at level 7, left associativity, format "s '/' [ sigma ; '/'  tau ]") : subst_scope.
+  Notation "s [ sigma ; tau ]" := (subst2 sigma tau s) (at level 7, left associativity, format "s '/' [ sigma ; '/' tau ]") : subst_scope.
 End SubstNotations.
 
 (** ** Type Class for Variables *)
@@ -130,10 +130,8 @@ Module CombineNotations.
 
   Notation "s .: sigma" := (scons s sigma) (at level 55, sigma at next level, right associativity) : subst_scope.
 
-  #[ global ]
-  Open Scope fscope.
-  #[ global ]
-  Open Scope subst_scope.
+  #[global] Open Scope fscope.
+  #[global] Open Scope subst_scope.
 End CombineNotations.
 
 Import CombineNotations.
@@ -210,7 +208,7 @@ Fixpoint shift_p (p : nat) {n} : ren n (p + n) :=
         | S p => Some (shift_p p n)
         end.
 
-Fixpoint scons_p {X: Type} {m : nat} : forall {n} (f : fin m -> X) (g : fin n -> X), fin (m + n)  -> X.
+Fixpoint scons_p {X: Type} {m : nat} : forall {n} (f : fin m -> X) (g : fin n -> X), fin (m + n) -> X.
 Proof.
   destruct m.
   - intros n f g. exact g.
@@ -281,16 +279,16 @@ Proof.
     + reflexivity.
 Qed.
 
-Lemma scons_p_tail' X  m n (f : fin m -> X) (g : fin n -> X) z :
-  scons_p  f g (shift_p m z) = g z.
+Lemma scons_p_tail' X m n (f : fin m -> X) (g : fin n -> X) z :
+  scons_p f g (shift_p m z) = g z.
 Proof. induction m; cbn; eauto. Qed.
 
-Lemma scons_p_tail_pointwise X  m n (f : fin m -> X) (g : fin n -> X) :
+Lemma scons_p_tail_pointwise X m n (f : fin m -> X) (g : fin n -> X) :
   pointwise_relation _ eq (funcomp (scons_p f g) (shift_p m)) g.
 Proof. intros z. induction m; cbn; eauto. Qed.
 
 Lemma destruct_fin {m n} (x : fin (m + n)):
-  (exists x', x = zero_p  x') \/ exists x', x = shift_p m x'.
+  (exists x', x = zero_p x') \/ exists x', x = shift_p m x'.
 Proof.
   induction m; simpl in *.
   - right. eauto.
@@ -306,6 +304,7 @@ Lemma scons_p_comp' X Y m n (f : fin m -> X) (g : fin n -> X) (h : X -> Y) :
 Proof.
   intros x.
   destruct (destruct_fin x) as [[x' ->]|[x' ->]].
+  (* TODO better way to solve this? *)
   - revert x'.
     apply pointwise_forall.
     change (fun x => (scons_p f g >> h) (zero_p x)) with (zero_p >> scons_p f g >> h).
@@ -323,7 +322,7 @@ Lemma scons_p_congr {X} {m n} (f f' : fin m -> X) (g g': fin n -> X) z:
 Proof. intros H1 H2. induction m; eauto. cbn. destruct z; eauto. Qed.
 
 (** Generic n-ary lifting operation. *)
-Definition upRen_p p { m : nat } { n : nat } (xi : (fin) (m) -> (fin) (n)) : fin (p + m) -> fin (p + n)  :=
+Definition upRen_p p { m : nat } { n : nat } (xi : (fin) (m) -> (fin) (n)) : fin (p + m) -> fin (p + n) :=
    scons_p  (zero_p ) (xi >> shift_p _).
 
 Arguments upRen_p p {m n} xi.
@@ -340,7 +339,7 @@ Qed.
 
 
 Arguments zero_p m {n}.
-Arguments scons_p  {X} m {n} f g.
+Arguments scons_p {X} m {n} f g.
 
 Lemma scons_p_eta {X} {m n} {f : fin m -> X}
       {g : fin n -> X} (h: fin (m + n) -> X) {z: fin (m + n)}:
@@ -361,16 +360,14 @@ Module ScopedNotations.
   Include SubstNotations.
   Include CombineNotations.
 
-(* Notation "s , sigma" := (scons s sigma) (at level 60, format "s ,  sigma", right associativity) : subst_scope. *)
+(* Notation "s , sigma" := (scons s sigma) (at level 60, format "s , sigma", right associativity) : subst_scope. *)
 
   Notation "s '..'" := (scons s ids) (at level 1, format "s ..") : subst_scope.
 
   Notation "↑" := (shift) : subst_scope.
 
-  #[global]
-  Open Scope fscope.
-  #[global]
-  Open Scope subst_scope.
+  #[global] Open Scope fscope.
+  #[global] Open Scope subst_scope.
 End ScopedNotations.
 
 
@@ -381,7 +378,7 @@ Tactic Notation "auto_case" tactic(t) :=  (match goal with
                                            | [|- forall (i : fin (S (S (S (S _))))), _] => intros [[[[|]|]|]|]; t
                                            | [|- forall (i : fin (S (S (S _)))), _] => intros [[[|]|]|]; t
                                            | [|- forall (i : fin (S (S _))), _] => intros [[?|]|]; t
-                                           | [|- forall (i : fin (S _)), _] =>  intros [?|]; t
+                                           | [|- forall (i : fin (S _)), _] => intros [?|]; t
                                            end).
 
 #[export] Hint Rewrite @scons_p_head' @scons_p_tail' : FunctorInstances.
@@ -393,17 +390,15 @@ Ltac fsimpl :=
          | [|- context[?f >> id]] => change (f >> id) with f (* AsimplCompIdR *)
          | [|- context [id ?s]] => change (id s) with s
          | [|- context[(?f >> ?g) >> ?h]] => change ((f >> g) >> h) with (f >> (g >> h)) (* AsimplComp *)
-         (* | [|- zero_p >> scons_p ?f ?g] => rewrite scons_p_head *)
          | [|- context[(?s .: ?sigma) var_zero]] => change ((s.:sigma) var_zero) with s
          | [|- context[(?s .: ?sigma) (shift ?m)]] => change ((s.:sigma) (shift m)) with (sigma m)
-           (* first [progress setoid_rewrite scons_tail' | progress setoid_rewrite scons_tail'_pointwise ] *)
          | [|- context[idren >> ?f]] => change (idren >> f) with f
          | [|- context[?f >> idren]] => change (f >> idren) with f
          | [|- context[?f >> (?x .: ?g)]] => change (f >> (x .: g)) with g (* f should evaluate to shift *)
          | [|- context[?x2 .: (funcomp ?f shift)]] => change (scons x2 (funcomp f shift)) with (scons (f var_zero) (funcomp f shift)); setoid_rewrite (@scons_eta' _ _ f); eta_reduce
          | [|- context[?f var_zero .: ?g]] => change (scons (f var_zero) g) with (scons (f var_zero) (funcomp f shift)); setoid_rewrite scons_eta'; eta_reduce
-         | [|- _ =  ?h (?f ?s)] => change (h (f s)) with ((f >> h) s)
-         | [|-  ?h (?f ?s) = _] => change (h (f s)) with ((f >> h) s)
+         | [|- _ = ?h (?f ?s)] => change (h (f s)) with ((f >> h) s)
+         | [|- ?h (?f ?s) = _] => change (h (f s)) with ((f >> h) s)
          | [|- context[funcomp _ (scons _ _)]] => setoid_rewrite scons_comp'; eta_reduce
          | [|- context[funcomp _ (scons_p _ _ _)]] => setoid_rewrite scons_p_comp'; eta_reduce
          | [|- context[scons (@var_zero _) shift]] => setoid_rewrite scons_eta_id'; eta_reduce
@@ -417,7 +412,84 @@ Ltac fsimpl :=
          | _ => first [progress minimize | progress cbn [shift scons scons_p] ]
          end.
 
-(* Decidable equality *)
+(** Decidable (in)equality *)
 
-Lemma fin_eq {n} (x y : fin n) : {x = y} + {x <> y}.
-Proof. induction n; [destruct x | decide equality]. Qed.
+(* Decidable equality for finite types *)
+Definition fin_eq {n} (x y : fin n) : {x = y} + {x <> y}.
+Proof. induction n; [destruct x | decide equality]. Defined.
+
+(* Decidable less-than for finite types *)
+Fixpoint fin_lt {n : nat} (x y : fin n) : bool :=
+  match n return fin n -> fin n -> bool with
+  | 0 => fun x _ => match x with end
+  | S m => fun x y =>
+      match x with
+      | None => match y with None => false | Some _ => true end
+      | Some x' => match y with None => false | Some y' => fin_lt x' y' end
+      end
+  end x y.
+
+(* Decidable less-than-or-equal for finite types *)
+Fixpoint fin_le {n : nat} (x y : fin n) : bool :=
+  match n return fin n -> fin n -> bool with
+  | 0 => fun x _ => match x with end
+  | S m => fun x y =>
+      match x, y with
+      | None, _ => true
+      | Some _, None => false
+      | Some x', Some y' => fin_le x' y'
+      end
+  end x y.
+
+(* Properties of fin_le, fin_lt *)
+
+Lemma fin_le_refl {n} (x : fin n) : fin_le x x = true.
+Proof. induction n; destruct x; now simpl. Qed.
+
+Lemma fin_le_trans {n} (x y z : fin n) :
+  fin_le x y = true -> fin_le y z = true -> fin_le x z = true.
+Proof.
+  revert y z; induction n; intros;
+  destruct x, y, z; auto; try discriminate.
+  now apply IHn with (y := f0).
+Qed.
+
+Lemma fin_le_antisym {n} (x y : fin n) :
+  fin_le x y = true -> fin_le y x = true -> x = y.
+Proof.
+  revert y; induction n; intros;
+  destruct x, y; auto; try discriminate.
+  f_equal; now apply IHn.
+Qed.
+
+Lemma fin_lt_irrefl {n} (x : fin n) : fin_lt x x = false.
+Proof. induction n; destruct x; now simpl. Qed.
+
+Lemma fin_lt_le {n} (x y : fin n) :
+  fin_lt x y = true -> fin_le x y = true.
+Proof. induction n; destruct x, y; simpl; auto. Qed.
+
+Lemma fin_lt_neq {n} (x y : fin n) :
+  fin_lt x y = true -> x <> y.
+Proof.
+  intros H ?; subst.
+  rewrite fin_lt_irrefl in H; discriminate.
+Qed.
+
+(* Shift preserves ordering *)
+Lemma fin_le_shift {n} (x y : fin n) :
+  fin_le x y = true -> fin_le (shift x) (shift y) = true.
+Proof. auto. Qed.
+
+(* var_zero is the minimum *)
+Lemma fin_le_zero {n} (x : fin (S n)) :
+  fin_le var_zero x = true.
+Proof. auto. Qed.
+
+(* Decidable: x ≤ y or y < x *)
+Lemma fin_le_lt_dec {n} (x y : fin n) :
+  {fin_le x y = true} + {fin_lt y x = true}.
+Proof.
+  revert y; induction n; intros; destruct x, y;
+  [destruct (IHn f f0); [left|right]|right|left|left]; auto.
+Qed.
